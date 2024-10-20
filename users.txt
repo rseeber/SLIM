@@ -1,0 +1,2 @@
+Alice   alice@aol.com   [someHashValue] [someSaltValue]
+Bob bob@gmail.com   [otherHash] [otherSalt]
