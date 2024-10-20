@@ -1,2 +1,5 @@
-Alice   alice@aol.com   [someHashValue] [someSaltValue]
-Bob bob@gmail.com   [otherHash] [otherSalt]
+Alice	alice@aol.com	[someHashValue]	[someSaltValue]
+Bob	bob@gmail.com	[otherHash]	[otherSalt]
+James	jj-jamison@gmail.com	thisisabadhash	~~badSalt~~
+James	jj-jamison@gmail.com	thisisabadhash	~~badSalt~~
+Zeta	zozo@icloud.com	yeahash	yeasalt
