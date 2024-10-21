@@ -1,4 +1,5 @@
 #include "main.hpp"
+#include "sockets.hpp"
 
 using namespace std;
 
@@ -8,19 +9,8 @@ list<login> myLogins;
 list<cookie> myCookies;
 
 int main(int argc, char** argv){
-    initDB();
-
-    //fifoSocket();
-    addUser("Donna", "d.donna@email.com", "badPassword1!");
-
-    login l;
-    if(findUser("Donna", &l) < 0){
-        cout << "uh-oh\n";
-    }
     
-    cout << "Printing login for " << l.user << ":\n";
-    printUser(l, 0);
+    setupServer();
 
-    exit();
     return 0;
 }
