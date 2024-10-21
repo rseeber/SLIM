@@ -13,6 +13,20 @@ using namespace std;
 #define SALT_LEN 16
 #define HASH_LEN 32
 #define API_MAX_LEN 100
+#define COOKIE_EXPIRY_LEN_SECONDS 600   //10 minutes = 60 seconds * 10 = 600 seconds
+
+struct login {
+    string user;
+    string email;
+    string passHash;
+    string salt;
+};
+
+struct cookie {
+    string user;
+    int token;
+    int expiry;
+};
 
 //creates a new user in the database
 int addUser(string user, string email, string passwd);
@@ -22,6 +36,9 @@ int editUser(string user, string oldPass, string newPass);
 string loginAsUser(string user, string passwd);
 //write the requested data to the buffer pointed to by buf
 int getUserData(string user, string cookie, int dataID, string* buf);
+//returns the login for user on the login pointed to by log
+int findUser(string user, login* log);
+
 //converts binary data into the cleaner hexidecimal format
 void toHex(unsigned char* hashData, __ssize_t dataLen, char* hashString);
 //converts Hexidecimal text back into binary data
@@ -30,6 +47,8 @@ void toBinary(const char* hex, size_t N, unsigned char* data);
 int initDB();
 //literally just print the whole database
 void printDB();
+//prints the specified login
+void printUser(login l, int i);
 //saves the database back into users.txt
 void saveDB();
 
@@ -41,19 +60,32 @@ int hashPasswd(string passwd, string* salt, string* buf);
 
 void exit();
 
-struct login {
-    string user;
-    string email;
-    string passHash;
-    string salt;
-};
+
 
 //this is where we load the users.txt data into
 list<login> myLogins;
+//list of all cookies, which are removed when they get accessed after expiration. These do not get saved to the harddrive on exit().
+list<cookie> myCookies;
 
 int main(int argc, char** argv){
     initDB();
 
+    //fifoSocket();
+    addUser("Donna", "d.donna@email.com", "badPassword1!");
+
+    login l;
+    if(findUser("Donna", &l) < 0){
+        cout << "uh-oh\n";
+    }
+    
+    cout << "Printing login for " << l.user << endl;
+    printUser(l, 0);
+
+    exit();
+    return 0;
+}
+
+int fifoSocket(){
     char* call = "/tmp/PMS-fifo_CALL";
     char* response = "/tmp/PMS-fifo_RESPONSE";
 
@@ -88,8 +120,6 @@ int main(int argc, char** argv){
     cout << "The Conversation:\n\n";
     cout << "[PROXY]: " << bufIn << endl;
     cout << "[MAIN]: " << bufOut << endl;
-
-    return 0;
 }
 
 void exit(){
@@ -99,8 +129,13 @@ void exit(){
 void printDB(){
     int i = 0;
     for(login l : myLogins){
-        cout << "[" << i++ << "]: " << l.user << "\t\t" << l.email << "\t\t" << l.passHash << "\t\t" << l.salt << endl;
+        printUser(l, i);
+        //cout << "[" << i++ << "]: " << l.user << "\t\t" << l.email << "\t\t" << l.passHash << "\t\t" << l.salt << endl;
     }
+}
+
+void printUser(login l, int i){
+    cout << "[" << i++ << "]: " << l.user << "\t" << l.email << "\t" << l.passHash << "\t" << l.salt << endl;
 }
 
 //loads the database into ram as a list of login structs
@@ -162,6 +197,69 @@ int addUser(string user, string email, string passwd){
     return 0;
 }
 
+int loginAsUser(string user, string passwd, cookie* cook){
+    //find the login entry for the desired user
+    login l;
+    if(findUser(user, &l) < 0){
+        return -1;
+    }
+
+    //check that the passwords match
+    string hash;
+    hashPasswd(passwd, l.salt, &hash);
+    if(hash != l.passHash){
+        cout << "error: couldn't login. Either passwords do not match, or database is corrupted. Aborting.\n";
+        return -1;
+    }
+    cout << "Login successful, generating random login token/cookie...\n";
+    //return a unique, random cookie value
+    return generateCookie(user, cook);
+}
+
+//generates a cookie, setting it at the pointer cook, as well as REGISTERING IT IN THE COOKIE DATABASE
+int generateCookie(string user, cookie* cook){
+    
+    int token;
+    if(RAND_bytes((unsigned char*)(&token), sizeof(int)) < 0){
+        cout << "error: couldn't generate random data\n";
+        return -1;
+    }
+    int expiry = time(nullptr) + COOKIE_EXPIRY_LEN_SECONDS;
+
+    //create the cookie
+    cookie c;
+    c.user = user;
+    c.token = token;
+    c.expiry = expiry;
+    //check to see if we already have this user in our cookie database
+    list<cookie>::iterator it = find(myCookies.begin(), myCookies.end(), c);
+    //if the user already has a registered cookie, delete the old one, and use the new one
+    if(it != myCookies.end()){
+        *it = c;
+    }
+    //otherwise, add a new cookie entry to the cookie database
+    myCookies.push_back(c);
+    sort(myCookies.begin(), myCookies.end());
+
+    //assign the value of cook to be our newly generated cookie entry
+    *cook = c;
+    return 0;
+}
+
+//goes through the database, and returns the login referring to the provided user
+int findUser(string user, login* log){
+    login l;
+    l.user = user;
+    list<login>::iterator it = find(myLogins.begin(), myLogins.end(), l);
+    if(it == myLogins.end()){
+        cout << "error: couldn't find specified user";
+        return -1;
+    }
+    //assign log with the value stored at it
+    *log = *it;
+    return 0;
+}
+
 //Hashes a password that you already have the salt for
 int hashPasswd(string passwd, string salt, string* buf){
     //append salt to the password before hashing
@@ -198,10 +296,6 @@ int hashPasswd(string passwd, string* salt, string* buf){
     return hashPasswd(passwd, *salt, buf);
 }
 
-unsigned char* generateSalt(unsigned char* salt){
-    return salt = (unsigned char*)random();
-}
-
 //hashString should be pre-allocated to double + 1 the size of hashData -> (32 * 2) + 1 = 65
 void toHex(unsigned char* hashData, __ssize_t dataLen, char* hashString){
     for(int i = 0; i < dataLen; ++i){
@@ -222,4 +316,16 @@ bool operator<(const login& first, const login& second){
 
 bool operator==(const login& a, const login& b){
     return (a.user == b.user) ? true : false;
+}
+
+bool operator==(const login& a, const string& b){
+    return (a.user == b) ? true : false;
+}
+
+bool operator==(const cookie& a, const cookie& b){
+    return (a.user == b.user) ? true : false;
+}
+
+bool operator<(const cookie& a, const cookie& b){
+    return (a.user < b.user) ? true : false;
 }

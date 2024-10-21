@@ -9,7 +9,12 @@ using namespace std;
 
 #define API_MAX_LEN 100
 
-int main(int argc, char** argv){
+int main(){
+    fido();
+    return 0;
+}
+
+int fido(){
 
     char* call = "/tmp/PMS-fifo_CALL";
     char* response = "/tmp/PMS-fifo_RESPONSE";
