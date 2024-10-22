@@ -33,7 +33,7 @@ int addUser(string user, string email, string passwd);
 //change passwd
 int editUser(string user, string oldPass, string newPass);
 //login, returinging a temporary login cookie for the user
-string loginAsUser(string user, string passwd);
+int loginAsUser(string user, string passwd, cookie* cook);
 //generates a unique cookie, saving it to the database, or overwriting any old cookie for that user.
 int generateCookie(string user, cookie* cook);
 //write the requested data to the buffer pointed to by buf
@@ -195,6 +195,8 @@ int loginAsUser(string user, string passwd, cookie* cook){
     hashPasswd(passwd, l.salt, &hash);
     if(hash != l.passHash){
         cout << "error: couldn't login. Either passwords do not match, or database is corrupted. Aborting.\n";
+        cout << "Input Hash : " << hash << endl;
+        cout << "Database Hash: " << l.passHash << endl;
         return -1;
     }
     cout << "Login successful, generating random login token/cookie...\n";
@@ -253,11 +255,12 @@ int hashPasswd(string passwd, string salt, string* buf){
     char* hash = (char*)malloc(33); //32 bytes + null terminator
 
     //hash the passwd+salt combo
+    //cout << "hashing \"" << saltedPasswd << "\"\n";
     SHA256((unsigned char*)saltedPasswd.c_str(), saltedPasswd.size(), (unsigned char*)hash);
-
 
     char* hashHex = (char*)malloc(HASH_LEN*2 + 1);  //hex text for the hash output
     toHex((unsigned char*)hash, HASH_LEN, hashHex);
+    //cout << "result: \"" << hashHex << "\"\n";
 
     buf->assign(hashHex);   //save the hash as hex text
     return 0;

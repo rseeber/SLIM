@@ -9,8 +9,21 @@ list<login> myLogins;
 list<cookie> myCookies;
 
 int main(int argc, char** argv){
+
+    initDB();
+
+    string user = "River";
+    string email = "river@email.com";
+    string password = "badPassword1";
+
+    addUser(user, email, password);
     
-    setupServer();
+    cookie c;
+    loginAsUser(user, password, &c);
+
+    cout << "Logged in as " << user << ". Token = " << c.token << endl;
+
+    saveDB();
 
     return 0;
 }

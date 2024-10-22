@@ -114,23 +114,12 @@ int Accept(int socket, struct sockaddr* addr, socklen_t* len){
 //Writes only the body to buf.
 //returns the number of bytes read from the header and body combined, or -1 on error
 int Read(int fd, char* buf, size_t max_bytes){
-    int msgLen, m, n, cnt;
+    int n, cnt;
 
-    //first read the 4 byte header to determine the length of the message body
-    if(m = read(fd, &msgLen, sizeof(msgLen)) < 0){
-        perror("Read() header error: ");
-        return m;
-    }
-
-    //use the smaller number
-    if(msgLen > max_bytes){
-        msgLen = max_bytes;
-    }
-
-    //read msgLen bytes
+    //read max_bytes or less
     cnt = 0;
-    while(n < msgLen){
-        if(n = read(fd, buf, msgLen - cnt) < 0){
+    while(n < max_bytes){
+        if(n = read(fd, buf, max_bytes - cnt) < 0){
             perror("Read() body error: ");
             return n;
         }
@@ -140,5 +129,5 @@ int Read(int fd, char* buf, size_t max_bytes){
         }
         cnt += n;
     }
-    return cnt + m;
+    return cnt;
 }
