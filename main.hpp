@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <string.h>
 using namespace std;
 
 #define SALT_LEN 16
@@ -24,7 +25,7 @@ struct login {
 
 struct cookie {
     string user;
-    int token;
+    unsigned int token;
     int expiry;
 };
 
@@ -71,9 +72,12 @@ extern list<cookie> myCookies;
 
 
 
-int fifoSocket(){
-    char* call = "/tmp/PMS-fifo_CALL";
-    char* response = "/tmp/PMS-fifo_RESPONSE";
+void fifoSocket(){
+    char call[25];
+    char response[25];
+
+    strcpy(call, "/tmp/PMS-fifo_CALL");
+    strcpy(response, "/tmp/PMS-fifo_RESPONSE");
 
     string bufIn;
     string bufOut;
@@ -207,7 +211,7 @@ int loginAsUser(string user, string passwd, cookie* cook){
 //generates a cookie, setting it at the pointer cook, as well as REGISTERING IT IN THE COOKIE DATABASE
 int generateCookie(string user, cookie* cook){
     
-    int token;
+    unsigned int token;
     if(RAND_bytes((unsigned char*)(&token), sizeof(int)) < 0){
         cout << "error: couldn't generate random data\n";
         return -1;
