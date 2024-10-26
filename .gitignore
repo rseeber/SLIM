@@ -1,3 +1,6 @@
+#IMPORTANT: DO NOT SYNC PASSWORDS TO GIT
+users.txt
+
 # IDE files
 .vscode/
 
