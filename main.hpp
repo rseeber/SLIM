@@ -132,6 +132,13 @@ void printUser(login l, int i){
 int initDB(){
     string line;
     ifstream ifs("users.txt");
+    //check if the file exists
+    if(!ifs.good()){
+        //create the file if it does not exist
+        ofstream ofs("users.txt");
+        ofs << "";
+        ofs.close();
+    }
     //save the current line of the document to `line`
     for(int i = 0; ifs.good(); ++i){
         login l;
