@@ -71,7 +71,7 @@ extern list<login> myLogins;
 extern list<cookie> myCookies;
 
 
-
+//depricated function (TODO: handle)
 void fifoSocket(){
     char call[25];
     char response[25];
@@ -112,6 +112,7 @@ void fifoSocket(){
     cout << "[MAIN]: " << bufOut << endl;
 }
 
+//TODO: investigate
 void exit(){
     saveDB();
 }
