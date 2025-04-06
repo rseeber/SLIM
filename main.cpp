@@ -1,5 +1,17 @@
-#include "main.hpp"
-#include "sockets.hpp"
+#include "login.hpp"
+//#include "sockets.hpp"
+
+#include <iostream>
+#include <list>             
+#include <fstream>
+#include <string>
+#include <algorithm>
+#include <openssl/sha.h>
+#include <openssl/rand.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <string.h>
 
 using namespace std;
 
@@ -17,7 +29,6 @@ int main(int argc, char** argv){
     if(argc == 2 && strcmp(argv[1], "-i") == 0){
         return createUsersInteractive();
     }
-    cout << "argc: " << argc << endl << "argv[1]: " << argv[1] << endl;
     //just make a single default value user
     return createSingleUser();
 }
@@ -57,7 +68,7 @@ int createUsersInteractive(){
     cout << "Successfully created " << cnt << " users." << endl;
     
     saveDB();
-    
+
     cout << "Successfully updated database!" << endl;
     
 

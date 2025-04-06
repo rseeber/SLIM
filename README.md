@@ -17,7 +17,7 @@ This header attempts to create network functionality, allowing the program to ac
 ## Compile and run
 To avoid compilation errors, you will need to pass the `-lcrypto` and `-lssl` flags to `g++`. Full command then would be:
 
-`g++ main.cpp -lssl -lcrypto -o bin/main`
+`g++ main.cpp login.cpp -lssl -lcrypto -o bin/main`
 then run `bin/main`.
 
 ### What it means
