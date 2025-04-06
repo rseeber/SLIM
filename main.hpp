@@ -29,11 +29,11 @@ struct cookie {
     int expiry;
 };
 
-//creates a new user in the database
+//creates a new user in the database with the given info, unless that username is already taken. Returns 0 on sucess, or -1 on error.
 int addUser(string user, string email, string passwd);
 //change passwd
 int editUser(string user, string oldPass, string newPass);
-//login, returinging a temporary login cookie for the user
+//login, setting 'cook' as a temporary login cookie for the user, returning 0 on success, or -1 on error.
 int loginAsUser(string user, string passwd, cookie* cook);
 //generates a unique cookie, saving it to the database, or overwriting any old cookie for that user.
 int generateCookie(string user, cookie* cook);
@@ -173,7 +173,7 @@ void saveDB(){
 }
 
 
-//creates a new user, with the given info, unless that username is already taken. Returns -1 in that case, or 0 if everything worked.
+
 int addUser(string user, string email, string passwd){
     login l;
     l.user = user;
@@ -211,7 +211,7 @@ int loginAsUser(string user, string passwd, cookie* cook){
         return -1;
     }
     cout << "Login successful, generating random login token/cookie...\n";
-    //return a unique, random cookie value
+    //set a unique, random cookie value. And return success value.
     return generateCookie(user, cook);
 }
 
