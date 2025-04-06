@@ -1,5 +1,6 @@
 #IMPORTANT: DO NOT SYNC PASSWORDS TO GIT
 users.txt
+data/
 
 # IDE files
 .vscode/
@@ -38,3 +39,6 @@ users.txt
 *.app
 main
 proxy
+
+# Executable folder
+bin/

@@ -131,11 +131,11 @@ void printUser(login l, int i){
 //loads the database into ram as a list of login structs
 int initDB(){
     string line;
-    ifstream ifs("users.txt");
+    ifstream ifs("data/users.txt");
     //check if the file exists
     if(!ifs.good()){
         //create the file if it does not exist
-        ofstream ofs("users.txt");
+        ofstream ofs("data/users.txt");
         ofs << "";
         ofs.close();
     }
@@ -159,7 +159,7 @@ int initDB(){
 }
 
 void saveDB(){
-    ofstream ofs("users.txt");
+    ofstream ofs("data/users.txt");
     for(login l : myLogins){
         //write the data from the list of structs into the text file
         ofs << l.user << "\t" << l.email << "\t" << l.passHash << "\t" << l.salt;
