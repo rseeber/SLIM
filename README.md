@@ -1,24 +1,32 @@
-# LOGIN SERVER
+# Login Server
 
-This is a program designed to allow users to signup and confirm login authentication using cryptographically secure methods (salting and hashing passwords, using secure hash algorithms, etc).
+This project is a source code C library which can be used to facilitate cryptographically secure management of login details from users. The library allows developers to easily create and maintain a dynamic database of users, storing their passwords as a salted SHA256 hash. It also provides full support for logging users in and handling temporary login tokens, such as cookies, which are common in web applications.
 
-## login.hpp and login.cpp - The login header
+The management of these temporary login tokens is fully managed by the library, including the automatic revocation of the tokens after some arbitrary time interval. (still partially in development)
 
-This header includes all the functions for hashing and storing passwords, as well as verifying login information - giving a login token on success, or printing an error on failure. This module also keeps track of all login tokens (cookies) for users who are logged in, as well as an associated expiry timestamp 10 minutes from the initial login.
+The login database (which contains usernames and password hashes) can be stored to a file on the disk, and then re-loaded into memory between server downtimes. The login tokens cannot be saved in such manner, due to security concerns.
 
-Following standard conventions, login.hpp includes function prototypes, and the login.cpp function should be compiled together with your program in order to use it's function implimentations.
+# Example Usage
 
-# Purpose
-The point of this project is to serve as a library which can be dropped into any project that needs secure login capabilities. The project is a prototype of using the library to accomplish that end. Thus, developers should only import the `lib/` folder into their project. My `main.cpp` file is meant only to demonstrate how and why to use the library.
+This project comes with an example file `main.cpp` to demonstrate how one can use the library. To compile this example, run `g++ main.cpp lib/login.cpp -lssl -lcrypto -o bin/main`, then run the resulting executable `bin/main`. If you run with the `-i` flag, it will allow you to create multiple logins, otherwise it will just create a default user "River". Either way, on termination it will save the login database to the file `users.txt` in `data/`. You will see that the password is securely stored as a SHA256 salted hash, and that if multiple users use the same password, their resulting hashes will all be unique due to the salt.
 
-# Compile and run
-To compile using my prototype `main.cpp` project, simply call `g++ main.cpp lib/login.cpp -lssl -lcrypto -o bin/main`, then run `bin/main` to execute.
+While the program is running, it keeps track of valid temporary login tokens (cookies). This collection is discarded after the program ends, forcing users to login again. Theoretically, a user could use this temporary token to validate their identity in place of their credentials during the duration of the token.
 
-# Developing with this library
-If you're a developer, simply copy `lib/` into your project, and use the same compiler command, but substitute your own source code in place of my `main.cpp` file.
+# Using this library in your projects
 
+To use this library, simply copy the `lib/` folder and it's contents into your project. You are free then to use any of the functions defined in `lib/login.hpp`. To compile, simply use `g++ <source files> lib/login.cpp -lssl -lcrypto`, where `<source files>` is a list of all source files you wish to link together in the program that uses this library (oftentimes something like `main.cpp`). 
 
-# Under the hood
-After you have run my `main.cpp` program, you will see a new file `users.txt` in the `data/` folder, which is a tab seperated database of the users that were created. It includes username, email, password hash, and password salt. You can see then that the password plaintext is not saved or managed by the database, but users are still able to login. The passwords are hashed using SHA256 with salt appended to the password.
+# Roadmap
 
-There's also currently a functional backend which manages login tokens (cookies) that expire after a set period of time. I'm still working on creating a library interface for this functionality. The database of tokens is not ever saved to the disk, as that could cause potential security flaws if cookies were allowed to stay in-tact between reboots.
+The plan for this project is to make it be sufficiently hardened so that it can be used in confidence to handle logins for low- to medium-profile targets, such as simple web blogs, or other small applications which don't handle financial data or significant secrets. It also will need to be fully featured, having all necessary functionality implemented. Below is listed an unordered list of tasks need doing still.
+
+- Add logout function for revoking tokens early
+- Create randomized userIDs, allow users to edit username and email (password changes are already implemented).
+- Clean up documentation
+- Delete abandoned or deprecated functions
+- Remove non-interface functions from `login.hpp` (determine which can be classed as that)
+- Expand example program to demonstrate how to use the login tokens to verify logins.
+    + Create functions for matching users to tokens and vice versa.
+- Create additional options for hashing methods, usage of pepper, etc
+- Create detailed documentation on how to use each interface function
+    + Create general reccomendations on how programs should be written to avoid problems (ex: writing to the disk periodically, not just when terminating the program)
