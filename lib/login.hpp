@@ -12,7 +12,7 @@ struct login {
 struct cookie {
     string user;
     unsigned int token;
-    int expiry;
+    time_t expiry;
 };
 
 //creates a new user in the database with the given info, unless that username is already taken. Returns 0 on sucess, or -1 on error.
@@ -23,6 +23,8 @@ int editUser(string user, string oldPass, string newPass);
 int loginAsUser(string user, string passwd, cookie* cook);
 //generates a unique cookie, saving it to the database, or overwriting any old cookie for that user.
 int generateCookie(string user, cookie* cook);
+//checks if both cookies have identical values in all fields
+bool cookiesEqual(cookie c1, cookie c2);
 //write the requested data to the buffer pointed to by buf
 int getUserData(string user, string cookie, int dataID, string* buf);
 //returns the login for user on the login pointed to by log

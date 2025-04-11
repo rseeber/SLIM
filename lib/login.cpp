@@ -178,8 +178,10 @@ int generateCookie(string user, cookie* cook){
         cout << "error: couldn't generate random data\n";
         return -1;
     }
-    int expiry = time(nullptr) + COOKIE_EXPIRY_LEN_SECONDS;
-
+    //NOTE: if time() fails, it returns -1, so the token is instantly expired (it was created in 1970).
+    //This relies on the assumption that the epoch started more than COOKIE_EXPIRY_LEN_SECONDS ago.
+    time_t expiry = time(nullptr) + COOKIE_EXPIRY_LEN_SECONDS;
+    
     //create the cookie
     cookie c;
     c.user = user;
@@ -198,6 +200,24 @@ int generateCookie(string user, cookie* cook){
     //assign the value of cook to be our newly generated cookie entry
     *cook = c;
     return 0;
+}
+
+//searches for the provided cookie in the database. Returns true if the cookie is unexpired, and exists in the database
+//as exactly the same as is passed in (for instance, the username has not been editted by the user). Returns false otherwise.
+bool validateToken(cookie c){
+    //check if our user exists within the cookie database (NOTE: searching the cookie database looks only at associated username!!)
+    list<cookie>::iterator it = find(myCookies.begin(), myCookies.end(), c);
+    
+    //if we found the cookie, and if that cookie is EXACTLY the same values
+    if(it != myCookies.end() && cookiesEqual(c, *it)){
+        //check if it's expired
+        time_t t = time(nullptr);
+        //we check t < 0 in case time() returned an error
+        if(c.expiry > t && t > 0){
+            return true;
+        }
+    }
+    return false;
 }
 
 //goes through the database, and returns the login referring to the provided user
@@ -284,4 +304,24 @@ bool operator==(const cookie& a, const cookie& b){
 
 bool operator<(const cookie& a, const cookie& b){
     return (a.user < b.user) ? true : false;
+}
+
+//cookie struct funcs
+
+//checks if both cookies have identical values in all fields
+bool cookiesEqual(cookie c1, cookie c2){
+    //check username
+    if(c1.user == c2.user)
+        return false;
+    
+    //check token value
+    if(c1.token != c2.token)
+        return false;
+
+    //check expiry
+    if(c1.expiry == c2.expiry)
+        return false;
+    
+    //if there's no differences, return true
+    return true;
 }
