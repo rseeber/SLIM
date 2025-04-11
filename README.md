@@ -26,7 +26,7 @@ The plan for this project is to make it be sufficiently hardened so that it can 
 - Delete abandoned or deprecated functions
 - Remove non-interface functions from `login.hpp` (determine which can be classed as that)
 - Expand example program to demonstrate how to use the login tokens to verify logins.
-    + Create functions for matching users to tokens and vice versa.
+    + ~~Create functions for matching users to tokens and vice versa.~~
 - Create additional options for hashing methods, usage of pepper, etc
 - Create detailed documentation on how to use each interface function
     + Create general reccomendations on how programs should be written to avoid problems (ex: writing to the disk periodically, not just when terminating the program)
