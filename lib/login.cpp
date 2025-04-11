@@ -170,6 +170,27 @@ int loginAsUser(string user, string passwd, cookie* cook){
     return generateCookie(user, cook);
 }
 
+//revokes a cookie token early, returns 0 on success, or -1 if the user did not have a token (valid or not)
+int logout(cookie c){
+    //find the cookie by username
+    list<cookie>::iterator it = find(myCookies.begin(), myCookies.end(), c);
+    //if found
+    if(it != myCookies.end()){
+        //check if the rest matches (notably the token value)
+        if(cookiesEqual(c, *it)){
+            //revoke cookie
+            myCookies.remove(c);
+            //NOTE: the above code will remove ALL cookies which are associated with the username of c.
+            // There might be instances were this would be unwanted functionality. But (!!) if we do not do
+            // it this way, a user could still have (potentially vulnerable) valid login tokens floating
+            // around, waiting for a hacker to exploit it. So we revoke ALL tokens for a user when they logout.
+            return 0;
+        }
+        
+    }
+    return -1;
+}
+
 //generates a cookie, setting it at the pointer cook, as well as REGISTERING IT IN THE COOKIE DATABASE
 int generateCookie(string user, cookie* cook){
     
