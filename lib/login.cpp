@@ -241,6 +241,30 @@ bool validateToken(cookie c){
     return false;
 }
 
+//changes the password for the user with the given userID. Generates new salt as well.
+// NOTE: the server should verify the user before running this function
+int editPasswd(int userID, string newPass){
+    //find user
+    list<login>::iterator it = find(myLogins.begin(), myLogins.end(), userID);
+    //if found
+    if (it != myLogins.end()){
+        
+    }
+}
+
+//changes the username of the user with the given userID.
+// NOTE: the server should verify the user before running this function
+int editUsername(int userID, string newUsername){
+
+}
+
+//changes the email for the user with the given userID.
+// NOTE: the server should verify the user before running this function
+int editEmail(int userID, string newEmail){
+
+}
+
+
 //goes through the database, and returns the login referring to the provided user
 int findUser(string user, login* log){
     login l;
@@ -307,22 +331,31 @@ void toBinary(const char* hex, size_t N, unsigned char* data){
 
 //operator overloads used for sorting entries in order to make searching the db efficient
 
+//compare logins by username
 bool operator<(const login& first, const login& second){
     return (first.user < second.user) ? true : false;
 }
-
 bool operator==(const login& a, const login& b){
     return (a.user == b.user) ? true : false;
 }
 
+//compare login with username
 bool operator==(const login& a, const string& b){
     return (a.user == b) ? true : false;
 }
 
+//login with userID
+bool operator<(const login& a, const int& b){
+    return (a.userID < b);
+}
+bool operator==(const login& a, const int& b){
+    return (a.userID == b);
+}
+
+//compare cookies
 bool operator==(const cookie& a, const cookie& b){
     return (a.user == b.user) ? true : false;
 }
-
 bool operator<(const cookie& a, const cookie& b){
     return (a.user < b.user) ? true : false;
 }
