@@ -21,8 +21,10 @@ To use this library, simply copy the `lib/` folder and it's contents into your p
 The plan for this project is to make it be sufficiently hardened so that it can be used in confidence to handle logins for low- to medium-profile targets, such as simple web blogs, or other small applications which don't handle financial data or significant secrets. It also will need to be fully featured, having all necessary functionality implemented. Below is listed an unordered list of tasks need doing still.
 
 - ~~Add logout function for revoking tokens early~~ (done)
-- Create randomized userIDs, allow users to edit username and email (password changes are already implemented).
+- ~~Create randomized userIDs, allow users to edit username and email.~~
+- Make userID the central reference for users. Totally phase out usernames from backend usage.
 - Clean up documentation
+- Create man pages for interface functions
 - Delete abandoned or deprecated functions
 - Remove non-interface functions from `login.hpp` (determine which can be classed as that)
 - Expand example program to demonstrate how to use the login tokens to verify logins.
