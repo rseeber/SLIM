@@ -228,7 +228,7 @@ int generateCookie(string user, cookie* cook){
 bool validateToken(cookie c){
     //check if our user exists within the cookie database (NOTE: searching the cookie database looks only at associated username!!)
     list<cookie>::iterator it = find(myCookies.begin(), myCookies.end(), c);
-    
+
     //if we found the cookie, and if that cookie is EXACTLY the same values
     if(it != myCookies.end() && cookiesEqual(c, *it)){
         //check if it's expired
@@ -242,8 +242,9 @@ bool validateToken(cookie c){
 }
 
 
-//finds a user and puts the iterator at the location pointed to by *it. Returns 0 on success or -1 on error.
-int findUser(int userID, list<login>::iterator *it){
+//finds a user from the users database, and puts the iterator at the location pointed to by *it. 
+// Returns 0 on success or -1 on error.
+int findUserByID(int userID, list<login>::iterator *it){
     *it = find(myLogins.begin(), myLogins.end(), userID);
     //if not found
     if(*it == myLogins.end()){
@@ -257,7 +258,7 @@ int findUser(int userID, list<login>::iterator *it){
 int editPasswd(int userID, string newPass){
     //find user
     list<login>::iterator it;
-    if (findUser(userID, &it) < 0){
+    if (findUserByID(userID, &it) < 0){
         //not found
         return -1;
     }
@@ -278,7 +279,7 @@ int editPasswd(int userID, string newPass){
 int editUsername(int userID, string newUsername){
     //find user
     list<login>::iterator it;
-    if(findUser(userID, &it) < 0){
+    if(findUserByID(userID, &it) < 0){
         return -1;
     }
 
@@ -293,7 +294,7 @@ int editUsername(int userID, string newUsername){
 int editEmail(int userID, string newEmail){
     //find user
     list<login>::iterator it;
-    if(findUser(userID, &it) < 0){
+    if(findUserByID(userID, &it) < 0){
         return -1;
     }
 

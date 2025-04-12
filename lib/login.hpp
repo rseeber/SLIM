@@ -11,7 +11,8 @@ struct login {
 };
 
 struct cookie {
-    string user;
+    int userID;
+    string user;    //depricated, phase out
     unsigned int token;
     time_t expiry;
 };
