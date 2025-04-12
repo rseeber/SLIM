@@ -67,6 +67,9 @@ void printUser(login l, int i);
 void saveDB();
 
 //UTILITY FUNCTIONS
+//TODO: change this. We should NOT have function overloads that perform
+// substantially different behaviors (notably, one takes IN salt, and one OUTPUTS it to a pointer location)
+
 //hashes the passwd with the salt, storing it at the buffer pointed to by buf
 int hashPasswd(string passwd, string salt, string* buf);
 

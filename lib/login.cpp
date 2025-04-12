@@ -241,29 +241,70 @@ bool validateToken(cookie c){
     return false;
 }
 
+
+//finds a user and puts the iterator at the location pointed to by *it. Returns 0 on success or -1 on error.
+int findUser(int userID, list<login>::iterator *it){
+    *it = find(myLogins.begin(), myLogins.end(), userID);
+    //if not found
+    if(*it == myLogins.end()){
+        return -1;
+    }
+    return 0;
+}
+
 //changes the password for the user with the given userID. Generates new salt as well.
 // NOTE: the server should verify the user before running this function
 int editPasswd(int userID, string newPass){
     //find user
-    list<login>::iterator it = find(myLogins.begin(), myLogins.end(), userID);
-    //if found
-    if (it != myLogins.end()){
-        
+    list<login>::iterator it;
+    if (findUser(userID, &it) < 0){
+        //not found
+        return -1;
     }
+    //generate a new password
+    string passHash, salt;
+    if(hashPasswd(newPass, &salt, &passHash) < 0){
+        //couldn't hash password. Try again.
+        return -1;
+    }
+    //save the passHash and salt to our user.
+    it->passHash = passHash;
+    it->salt = salt;
+    return 0;
 }
 
 //changes the username of the user with the given userID.
 // NOTE: the server should verify the user before running this function
 int editUsername(int userID, string newUsername){
+    //find user
+    list<login>::iterator it;
+    if(findUser(userID, &it) < 0){
+        return -1;
+    }
+
+    //set the username
+    it->user = newUsername;
+    return 0;
 
 }
 
 //changes the email for the user with the given userID.
 // NOTE: the server should verify the user before running this function
 int editEmail(int userID, string newEmail){
+    //find user
+    list<login>::iterator it;
+    if(findUser(userID, &it) < 0){
+        return -1;
+    }
 
+    //change email
+    it->email = newEmail;
+    return 0;
 }
 
+
+//TODO: rename this function or it's previous accidental override. Although they both have a decent
+//overlap in functionality, they're intended for different ends of the application (i think). Make a good fix.
 
 //goes through the database, and returns the login referring to the provided user
 int findUser(string user, login* log){
