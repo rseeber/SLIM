@@ -98,12 +98,14 @@ int initDB(){
     for(int i = 0; ifs.good(); ++i){
         login l;
         //now break up the line into valid pieces to save as each part of the login
-        ifs >> l.user >> l.email >> l.passHash >> l.salt;
+        ifs >> l.userID >> l.user >> l.email >> l.passHash >> l.salt;
 
         //don't save empty values to myLogins
-        if(l.user == ""){
-            continue;
-        }
+        //NOTE: I thinkk
+        //we don't need this because a value won't be read into an int until a non-empty character is read
+      //if(l.userID == ""){
+      //    continue;
+      //}
 
         //append l to myLogins
         myLogins.push_back(l);
@@ -117,10 +119,10 @@ void saveDB(){
     ofstream ofs("data/users.txt");
     for(login l : myLogins){
         //write the data from the list of structs into the text file
-        ofs << l.user << "\t" << l.email << "\t" << l.passHash << "\t" << l.salt;
+        ofs << l.userID << "\t" << l.user << "\t" << l.email << "\t" << l.passHash << "\t" << l.salt;
         
         //only print a newline if we're NOT on the last entry
-        if(myLogins.back().user != l.user){   //compare the usernames
+        if(myLogins.back().userID != l.userID){   //compare the usernames
             ofs << endl;
         }
     }
@@ -130,18 +132,26 @@ void saveDB(){
 
 
 int addUser(string user, string email, string passwd){
-    login l;
-    l.user = user;
-
     //first check that this user does not already exist in the system
-    if(binary_search(myLogins.begin(), myLogins.end(), l)){
-        cout << "error: cannot addUser '" << user << "', as this name is already in use!\n";
+    //NOTE: we do this because the username still must be unique to each user. No duplicates allowed.
+    if(findUserByName(user, nullptr) >= 0){
+        //cout << "error: cannot addUser '" << user << "', as this name is already in use!\n";
         return -1;
     }
-
-    //otherwise, proceed
+    login l;
+    //add basic values
+    l.user = user;
     l.email = email;
+
+    //generate a random userID
+    unsigned int id;
+    //generate random userID. If a user with that ID already exists, generate a new one until it's unique.
+    while(RAND_bytes((unsigned char*)&id, sizeof(int)) < 0 && findUserByID(id, nullptr) >= 0);
+    l.userID = id;
+
+    //password hashing
     hashPasswd(passwd, &l.salt, &l.passHash);
+
     //append l to myLogins
     myLogins.push_back(l);
     //sort myLogins
@@ -152,7 +162,7 @@ int addUser(string user, string email, string passwd){
 int loginAsUser(string user, string passwd, cookie* cook){
     //find the login entry for the desired user
     login l;
-    if(findUser(user, &l) < 0){
+    if(findUserByName(user, &l) < 0){
         return -1;
     }
 
@@ -167,7 +177,7 @@ int loginAsUser(string user, string passwd, cookie* cook){
     }
     cout << "Login successful, generating random login token/cookie...\n";
     //set a unique, random cookie value. And return success value.
-    return generateCookie(user, cook);
+    return generateCookie(l.userID, cook);
 }
 
 //revokes a cookie token early, returns 0 on success, or -1 if the user did not have a token (valid or not)
@@ -192,7 +202,7 @@ int logout(cookie c){
 }
 
 //generates a cookie, setting it at the pointer cook, as well as REGISTERING IT IN THE COOKIE DATABASE
-int generateCookie(string user, cookie* cook){
+int generateCookie(int userID, cookie* cook){
     
     unsigned int token;
     if(RAND_bytes((unsigned char*)(&token), sizeof(int)) < 0){
@@ -205,7 +215,8 @@ int generateCookie(string user, cookie* cook){
     
     //create the cookie
     cookie c;
-    c.user = user;
+    c.userID = userID;
+    //c.user = user; //depricated
     c.token = token;
     c.expiry = expiry;
     //check to see if we already have this user in our cookie database
@@ -244,7 +255,7 @@ bool validateToken(cookie c){
 
 //finds a user from the users database, and puts the iterator at the location pointed to by *it. 
 // Returns 0 on success or -1 on error.
-int findUserByID(int userID, list<login>::iterator *it){
+int findUserByID(unsigned int userID, list<login>::iterator *it){
     *it = find(myLogins.begin(), myLogins.end(), userID);
     //if not found
     if(*it == myLogins.end()){
@@ -308,16 +319,17 @@ int editEmail(int userID, string newEmail){
 //overlap in functionality, they're intended for different ends of the application (i think). Make a good fix.
 
 //goes through the database, and returns the login referring to the provided user
-int findUser(string user, login* log){
-    login l;
-    l.user = user;
-    list<login>::iterator it = find(myLogins.begin(), myLogins.end(), l);
+int findUserByName(string user, login* l){
+    list<login>::iterator it = find(myLogins.begin(), myLogins.end(), user);
     if(it == myLogins.end()){
-        cout << "error: couldn't find specified user";
+        //cout << "error: couldn't find specified user";
         return -1;
     }
-    //assign log with the value stored at it
-    *log = *it;
+
+    //save the login to l, unless l is a nullptr
+    if(l != nullptr){
+        *l = *it;
+    }
     return 0;
 }
 
@@ -373,12 +385,13 @@ void toBinary(const char* hex, size_t N, unsigned char* data){
 
 //operator overloads used for sorting entries in order to make searching the db efficient
 
-//compare logins by username
-bool operator<(const login& first, const login& second){
-    return (first.user < second.user) ? true : false;
+//compare logins
+//NOTE: recent updates have changed comparisons from username-username to userID-userID (!!)
+bool operator<(const login& a, const login& b){
+    return (a.userID < b.userID);
 }
 bool operator==(const login& a, const login& b){
-    return (a.user == b.user) ? true : false;
+    return (a.userID == b.userID);
 }
 
 //compare login with username
@@ -406,6 +419,10 @@ bool operator<(const cookie& a, const cookie& b){
 
 //checks if both cookies have identical values in all fields
 bool cookiesEqual(cookie c1, cookie c2){
+    //check userID
+    if(c1.userID != c2.userID)
+        return false;
+
     //check username
     if(c1.user == c2.user)
         return false;

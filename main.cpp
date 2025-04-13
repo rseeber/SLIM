@@ -57,8 +57,7 @@ int createUsersInteractive(){
         //save current user
         //error checking
         if (addUser(user, email, password) < 0){
-            cout << "Error: couldn't add user, username already taken!\nPress enter to continue...";
-            cin;
+            cout << "Error: couldn't add user, username already taken!\nTry again.\n";
             --i;    //don't increase the count of users if the user wasn't actually added
             continue;
         }

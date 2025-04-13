@@ -1,9 +1,10 @@
 #include <string>
+#include <list>
 
 using namespace std;
 
 struct login {
-    int userID; //new
+    unsigned int userID; //new
     string user;
     string email;
     string passHash;
@@ -11,7 +12,7 @@ struct login {
 };
 
 struct cookie {
-    int userID;
+    unsigned int userID;
     string user;    //depricated, phase out
     unsigned int token;
     time_t expiry;
@@ -36,7 +37,7 @@ int editEmail(int userID, string newEmail);
 int loginAsUser(string user, string passwd, cookie* cook);
 
 //generates a unique cookie, saving it to the database, or overwriting any old cookie for that user.
-int generateCookie(string user, cookie* cook);
+int generateCookie(int userID, cookie* cook);
 
 //checks if both cookies have identical values in all fields
 bool cookiesEqual(cookie c1, cookie c2);
@@ -45,9 +46,11 @@ bool cookiesEqual(cookie c1, cookie c2);
 int getUserData(string user, string cookie, int dataID, string* buf);
 
 //returns the login for user on the login pointed to by log
-int findUser(string user, login* log);
+int findUserByName(string user, login* log);
 
-
+//finds a user from the users database, and puts the iterator at the location pointed to by *it. 
+// Returns 0 on success or -1 on error.
+int findUserByID(unsigned int userID, list<login>::iterator *it);
 
 //converts binary data into the cleaner hexidecimal format
 void toHex(unsigned char* hashData, __ssize_t dataLen, char* hashString);
