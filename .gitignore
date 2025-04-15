@@ -42,3 +42,4 @@ proxy
 
 # Executable folder
 bin/
+pkg/

@@ -16,6 +16,12 @@ While the program is running, it keeps track of valid temporary login tokens (co
 
 To use this library, simply copy the `lib/` folder and it's contents into your project. You are free then to use any of the functions defined in `lib/login.hpp`. To compile, simply use `g++ <source files> lib/login.cpp -lssl -lcrypto`, where `<source files>` is a list of all source files you wish to link together in the program that uses this library (oftentimes something like `main.cpp`). 
 
+## Compiling the library
+
+If you prefer, you are also able to compile the library into an object file (ex `main.o`), which can then be linked together with your source files slightly more easily. To compile **just the library**, run `g++ -c lib/login.cpp -lssl -lcrypto -o pkg/main.o`, or if you have `make` installed: `make obj`.
+
+Then, to compile your **actual program**, run `g++ <source file(s)> pkg/main.o`, or if you'd like to use `make` to compile the example program this way, run `make buildLib` (in our case, since `main.cpp` requires the crypto library, we need to append `-lcrypto` to our compilation command in the make file. This is because `main.cpp` needs this, and has nothing to do with the requirements of the library we're using).
+
 # Roadmap
 
 The plan for this project is to make it be sufficiently hardened so that it can be used in confidence to handle logins for low- to medium-profile targets, such as simple web blogs, or other small applications which don't handle financial data or significant secrets. It also will need to be fully featured, having all necessary functionality implemented. Below is listed an unordered list of tasks need doing still.
