@@ -38,6 +38,9 @@ int editEmail(int userID, string newEmail);
 //login, setting 'cook' as a temporary login cookie for the user, returning 0 on success, or -1 on error.
 int loginAsUser(string user, string passwd, cookie* cook);
 
+//revokes a cookie token early, returns 0 on success, or -1 if the user did not have a token (valid or not)
+int logout(cookie c);
+
 //load the database into ram as an array of structs
 int initDB();
 

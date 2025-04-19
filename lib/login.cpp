@@ -1,3 +1,9 @@
+/*
+ * Project: Login Manager Library
+ * Author: River Seeber
+ * Date: April 2025
+ */
+
 #include "internal.hpp"
 
 #include <iostream>

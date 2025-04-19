@@ -1,6 +1,6 @@
 # Login Server
 
-This project is a source code C library which can be used to facilitate cryptographically secure management of login details from users. The library allows developers to easily create and maintain a dynamic database of users, storing their passwords as a salted SHA256 hash. It also provides full support for logging users in and handling temporary login tokens, such as cookies, which are common in web applications.
+This project is a C++ library which can be used to facilitate cryptographically secure management of login details from users. The library allows developers to easily create and maintain a dynamic database of users, storing their passwords as a salted SHA256 hash. It also provides full support for logging users in and handling temporary login tokens, such as cookies, which are common in web applications.
 
 The management of these temporary login tokens is fully managed by the library, including the automatic revocation of the tokens after some arbitrary time interval. (still partially in development)
 
@@ -8,19 +8,22 @@ The login database (which contains usernames and password hashes) can be stored 
 
 # Example Usage
 
-This project comes with an example file `main.cpp` to demonstrate how one can use the library. To compile this example, run `g++ main.cpp lib/login.cpp -lssl -lcrypto -o bin/main`, then run the resulting executable `bin/main`. If you run with the `-i` flag, it will allow you to create multiple logins, otherwise it will just create a default user "River". Either way, on termination it will save the login database to the file `users.txt` in `data/`. You will see that the password is securely stored as a SHA256 salted hash, and that if multiple users use the same password, their resulting hashes will all be unique due to the salt.
+This project comes with an example file `main.cpp` to demonstrate how one can use the library. To compile this example, run `make build`. The resulting executable can be found in `bin/main`. If you run with the `-i` flag, it will allow you to create multiple logins, otherwise it will just create a default user "River". Either way, on termination it will save the login database to the file `users.txt` in `data/`. You will see that the password is securely stored as a SHA256 salted hash, and that if multiple users use the same password, their resulting hashes will all be unique due to the salt.
 
 While the program is running, it keeps track of valid temporary login tokens (cookies). This collection is discarded after the program ends, forcing users to login again. Theoretically, a user could use this temporary token to validate their identity in place of their credentials during the duration of the token.
 
 # Using this library in your projects
 
-To use this library, simply copy the `lib/` folder and it's contents into your project. You are free then to use any of the functions defined in `lib/login.hpp`. To compile, simply use `g++ <source files> lib/login.cpp -lssl -lcrypto`, where `<source files>` is a list of all source files you wish to link together in the program that uses this library (oftentimes something like `main.cpp`). 
+## Method 1: Importing the object files (reccomended)
+The first way to use this library in your C programs is to import compiled object files. You can find these under the "Releases" page. The object file comes with an associated pgp signature. You can find my pgp key on [my website](https://rseeber.github.io/about.html). The key file can either be downloaded, or use the fingerprint to get it from a keyserver.
 
-## Compiling the library
+After you've verified the files, simply import them somewhere into your project somewhere suitable. You should be putting both the `login.o` AND the `login.hpp` file into the project. You will then place an include line in any programs which utilize the library, such as `#include "login.hpp"`.
 
-If you prefer, you are also able to compile the library into an object file (ex `main.o`), which can then be linked together with your source files slightly more easily. To compile **just the library**, run `g++ -c lib/login.cpp -lssl -lcrypto -o pkg/main.o`, or if you have `make` installed: `make obj`.
+Finally, when you compile your program, you will need to link your program's code with the library object file. To do this in g++, run `g++ <your source file(s)> login.o -lcrypto`. Note that it is also necessary that you link to the crypto library when compiling (`-lcrypto`), as this is the library used for password salt and hashing.
 
-Then, to compile your **actual program**, run `g++ <source file(s)> pkg/main.o`, or if you'd like to use `make` to compile the example program this way, run `make buildLib` (in our case, since `main.cpp` requires the crypto library, we need to append `-lcrypto` to our compilation command in the make file. This is because `main.cpp` needs this, and has nothing to do with the requirements of the library we're using).
+
+## Method 2: Compiling the library yourself
+Although the object files are provided pre-compiled, it is possible for you to compile the object files yourself. To do so, aquire a copy of the `lib/` directory in this repo. From there, pass the `-c` flag to gcc to compile to object files: `g++ -c lib/login.cpp -o bin/main`. After that, use your resulting object file the same way you do in Method 1 to compile your project.
 
 # Roadmap
 
@@ -28,13 +31,14 @@ The plan for this project is to make it be sufficiently hardened so that it can 
 
 - ~~Add logout function for revoking tokens early~~ (done)
 - ~~Create randomized userIDs, allow users to edit username and email.~~ (done)
-- Make userID the central reference for users. Totally phase out usernames from backend usage.
+- ~~Make userID the central reference for users~~. Totally phase out usernames from backend usage.
 - Clean up documentation
 - Create man pages for interface functions
 - Delete abandoned or deprecated functions
-- Remove non-interface functions from `login.hpp` (determine which can be classed as that)
+- ~~Remove non-interface functions from `login.hpp` (determine which can be classed as that)~~
 - Expand example program to demonstrate how to use the login tokens to verify logins.
     + ~~Create functions for matching users to tokens and vice versa.~~ (done)
 - Create additional options for hashing methods, usage of pepper, etc
 - Create detailed documentation on how to use each interface function
     + Create general reccomendations on how programs should be written to avoid problems (ex: writing to the disk periodically, not just when terminating the program)
+- Apply an open-source, copyleft license (LGPL?)
