@@ -4,7 +4,7 @@
 using namespace std;
 
 struct login {
-    unsigned int userID; //new
+    int userID; //new
     string user;
     string email;
     string passHash;
@@ -12,7 +12,7 @@ struct login {
 };
 
 struct cookie {
-    unsigned int userID;
+    int userID;
     string user;    //depricated, phase out
     unsigned int token;
     time_t expiry;
@@ -38,8 +38,14 @@ int editEmail(int userID, string newEmail);
 //login, setting 'cook' as a temporary login cookie for the user, returning 0 on success, or -1 on error.
 int loginAsUser(string user, string passwd, cookie* cook);
 
-//revokes a cookie token early, returns 0 on success, or -1 if the user did not have a token (valid or not)
-int logout(cookie c);
+//revokes a cookie token early. Returns the userID of the logged out user on success, or -1 on error.
+int logout(unsigned int token);
+
+//searches database for an unexpired cookie with the given token value. Returns the associated userID, or -1 on failure.
+int validateToken(unsigned int token);
+
+//removes a user associated with a given userID from the login database. returns 0 on success, or -1 if no such user exists.
+int deleteUser(int userID);
 
 //load the database into ram as an array of structs
 int initDB();

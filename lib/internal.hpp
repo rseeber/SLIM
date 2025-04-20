@@ -18,11 +18,8 @@ int findUserByName(string user, login* log);
 // Returns 0 on success or -1 on error.
 int findUserByID(unsigned int userID, list<login>::iterator *it);
 
-//converts binary data into the cleaner hexidecimal format
-void toHex(unsigned char* hashData, __ssize_t dataLen, char* hashString);
-
-//converts Hexidecimal text back into binary data
-void toBinary(const char* hex, size_t N, unsigned char* data);
+//returns the current username for a given userID
+string getUsername(int userID);
 
 
 
@@ -31,6 +28,14 @@ void printDB();
 
 //prints the specified login
 void printUser(login l, int i);
+
+
+
+//converts binary data into the cleaner hexidecimal format
+void toHex(unsigned char* hashData, __ssize_t dataLen, char* hashString);
+
+//converts Hexidecimal text back into binary data
+void toBinary(const char* hex, size_t N, unsigned char* data);
 
 
 

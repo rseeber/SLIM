@@ -30,48 +30,6 @@ static list<login> myLogins;
 //list of all cookies, which are removed when they get accessed after expiration. These do not get saved to the harddrive on exit().
 static list<cookie> myCookies;
 
-
-//depricated function (TODO: handle)
-void fifoSocket(){
-    char call[25];
-    char response[25];
-
-    strcpy(call, "/tmp/PMS-fifo_CALL");
-    strcpy(response, "/tmp/PMS-fifo_RESPONSE");
-
-    string bufIn;
-    string bufOut;
-
-    cout << "creating fifo named pipes\n";
-    /* create the FIFO (named pipe) */
-    mkfifo(call, 0666);
-    mkfifo(response, 0666);
-
-    cout << "calling ./proxy\n";
-    //system("./proxy");
-
-    ifstream fin(call);
-    ofstream fout(response);
-    string line;
-
-    cout << "starting while loop\n";
-    while(1){
-
-        fin >> bufIn;
-        cout << "read '" << bufIn << "' from proxy\n";
-        
-        bufOut.assign("You just said '"+(string)bufIn+"'\n");
-        cout << "writing '" << bufOut << "' to proxy\n";
-        fout << bufOut;
-
-        break;
-    }
-
-    cout << "The Conversation:\n\n";
-    cout << "[PROXY]: " << bufIn << endl;
-    cout << "[MAIN]: " << bufOut << endl;
-}
-
 //TODO: investigate
 void exit(){
     saveDB();
@@ -135,8 +93,6 @@ void saveDB(){
     ofs.close();
 }
 
-
-
 int addUser(string user, string email, string passwd){
     //first check that this user does not already exist in the system
     //NOTE: we do this because the username still must be unique to each user. No duplicates allowed.
@@ -186,25 +142,49 @@ int loginAsUser(string user, string passwd, cookie* cook){
     return generateCookie(l.userID, cook);
 }
 
-//revokes a cookie token early, returns 0 on success, or -1 if the user did not have a token (valid or not)
-int logout(cookie c){
+//revokes a cookie token early. 
+int logout(unsigned int token){
     //find the cookie by username
-    list<cookie>::iterator it = find(myCookies.begin(), myCookies.end(), c);
+    list<cookie>::iterator it = find(myCookies.begin(), myCookies.end(), token);
     //if found
     if(it != myCookies.end()){
-        //check if the rest matches (notably the token value)
-        if(cookiesEqual(c, *it)){
-            //revoke cookie
-            myCookies.remove(c);
-            //NOTE: the above code will remove ALL cookies which are associated with the username of c.
-            // There might be instances were this would be unwanted functionality. But (!!) if we do not do
-            // it this way, a user could still have (potentially vulnerable) valid login tokens floating
-            // around, waiting for a hacker to exploit it. So we revoke ALL tokens for a user when they logout.
-            return 0;
+        //revoke cookie
+        //NOTE: this will remove ALL cookies for a logged in user, not just the particular token provided. This is a good thing.
+        myCookies.remove(*it);
+        //return the userID of the logged out user.
+        return it->userID;
+    }
+    //not found
+    return -1;
+}
+
+//searches database for an unexpired cookie with the given token value. Returns the associated userID, or -1 on failure.
+int validateToken(unsigned int token){
+    //check if our user exists within the cookie database (NOTE: searching the cookie database looks only at associated username!!)
+    list<cookie>::iterator it = find(myCookies.begin(), myCookies.end(), token);
+
+    //if we found the cookie
+    if(it != myCookies.end()){
+        //check if it's expired
+        time_t t = time(nullptr);
+        //we check t < 0 in case time() returned an error
+        if(it->expiry > t && !(t < 0)){
+            return it->userID;
         }
-        
     }
     return -1;
+}
+
+//removes a user associated with a given userID from the login database. returns 0 on success, or -1 if no such user exists.
+int deleteUser(int userID){
+    list<login>::iterator it;
+    if(findUserByID(userID, &it) < 0){
+        //error, can't find user
+        return -1;
+    }
+    //remove the user
+    myLogins.remove(*it);
+    return 0;
 }
 
 //generates a cookie, setting it at the pointer cook, as well as REGISTERING IT IN THE COOKIE DATABASE
@@ -240,34 +220,27 @@ int generateCookie(int userID, cookie* cook){
     return 0;
 }
 
-//searches for the provided cookie in the database. Returns true if the cookie is unexpired, and exists in the database
-//as exactly the same as is passed in (for instance, the username has not been editted by the user). Returns false otherwise.
-bool validateToken(cookie c){
-    //check if our user exists within the cookie database (NOTE: searching the cookie database looks only at associated username!!)
-    list<cookie>::iterator it = find(myCookies.begin(), myCookies.end(), c);
-
-    //if we found the cookie, and if that cookie is EXACTLY the same values
-    if(it != myCookies.end() && cookiesEqual(c, *it)){
-        //check if it's expired
-        time_t t = time(nullptr);
-        //we check t < 0 in case time() returned an error
-        if(c.expiry > t && t > 0){
-            return true;
-        }
-    }
-    return false;
-}
-
-
 //finds a user from the users database, and puts the iterator at the location pointed to by *it. 
 // Returns 0 on success or -1 on error.
-int findUserByID(unsigned int userID, list<login>::iterator *it){
+int findUserByID(int userID, list<login>::iterator *it){
     *it = find(myLogins.begin(), myLogins.end(), userID);
     //if not found
     if(*it == myLogins.end()){
         return -1;
     }
     return 0;
+}
+
+//returns the current username for a given userID
+string getUsername(int userID){
+    list<login>::iterator it;
+    //find the login object
+    if(findUserByID(userID, &it) < 0){
+        //error
+        return "";
+    }
+    // pull out the username
+    return it->user;
 }
 
 //changes the password for the user with the given userID. Generates new salt as well.
@@ -402,7 +375,7 @@ bool operator==(const login& a, const login& b){
 
 //compare login with username
 bool operator==(const login& a, const string& b){
-    return (a.user == b) ? true : false;
+    return (a.user == b);
 }
 
 //login with userID
@@ -415,10 +388,18 @@ bool operator==(const login& a, const int& b){
 
 //compare cookies
 bool operator==(const cookie& a, const cookie& b){
-    return (a.user == b.user) ? true : false;
+    return (a.userID == b.userID);
 }
 bool operator<(const cookie& a, const cookie& b){
-    return (a.user < b.user) ? true : false;
+    return (a.userID < b.userID);
+}
+
+//compare cookie with token
+bool operator==(const cookie& a, const unsigned int b){
+    return a.token == b;
+}
+bool operator<(const cookie& a, const unsigned int b){
+    return a.token < b;
 }
 
 //cookie struct funcs
