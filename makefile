@@ -5,5 +5,5 @@ bin/login.o:
 	g++ -c lib/login.cpp -o bin/login.o
 
 clean:
-	touch bin/deleteme
-	gio trash bin/*
+	gio trash bin/login.o -f
+	gio trash bin/main -f
