@@ -18,12 +18,6 @@ using namespace std;
 int createSingleUser();
 int createUsersInteractive();
 
-
-//this is where we load the users.txt data into
-list<login> myLogins;
-//list of all cookies, which are removed when they get accessed after expiration. These do not get saved to the harddrive on exit().
-list<cookie> myCookies;
-
 int main(int argc, char** argv){
     //interactive mode
     if(argc == 2 && strcmp(argv[1], "-i") == 0){
