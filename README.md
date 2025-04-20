@@ -1,4 +1,4 @@
-# Login Server
+# Simple LogIn Manager (SLIM)
 
 This project is a C++ library which can be used to facilitate cryptographically secure management of login details from users. The library allows developers to easily create and maintain a dynamic database of users, storing their passwords as a salted SHA256 hash. It also provides full support for logging users in and handling temporary login tokens, such as cookies, which are common in web applications.
 
