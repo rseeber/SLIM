@@ -16,7 +16,7 @@ int findUserByName(string user, login* log);
 
 //finds a user from the users database, and puts the iterator at the location pointed to by *it. 
 // Returns 0 on success or -1 on error.
-int findUserByID(unsigned int userID, list<login>::iterator *it);
+int findUserByID(int userID, list<login>::iterator *it);
 
 //returns the current username for a given userID
 string getUsername(int userID);
