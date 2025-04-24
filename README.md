@@ -10,7 +10,7 @@ The login database (which contains usernames and password hashes) can be stored 
 
 This project comes with an example file `main.cpp` to demonstrate how one can use the library. To compile this example, run `make build`. The resulting executable can be found in `bin/main`. If you run with the `-i` flag, it will allow you to create multiple logins, otherwise it will just create a default user "River". Either way, on termination it will save the login database to the file `users.txt` in `data/`. You will see that the password is securely stored as a SHA256 salted hash, and that if multiple users use the same password, their resulting hashes will all be unique due to the salt.
 
-While the program is running, it keeps track of valid temporary login tokens (cookies). This collection is discarded after the program ends, forcing users to login again. Theoretically, a user could use this temporary token to validate their identity in place of their credentials during the duration of the token.
+While the program is running, it keeps track of valid temporary login tokens (cookies). If you pass in the `-l` (as in "login") flag instead of `-i`, you can handle active logins. In this mode, it will load up all the login cookies from `data/cookies.txt`. You can log a new user in by selecting that option and entering the credentials. Then, the program will add that user to the cookie database. Finally, it will save the cookies back to the `cookies.txt` file, to be loaded again next time it's called. Users can be logged out early by selecting the "logout" option instead of "log in" at runtime.
 
 # Using this library in your projects
 
