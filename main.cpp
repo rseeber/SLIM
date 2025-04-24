@@ -39,7 +39,33 @@ int userLogin(){
 
     initCookieDB();
     //print logged in users
-    
+    cout << "===================\n" << "Logged in users" << "===================\n";
+    cout << getLoggedInUsers_string() << "\n\n";
+
+    // Login or log out
+    cout << "What do you want to do?\n\ta) log a user in\n\tb) log out a user\n\n> ";
+    char opt;
+    cin >> opt;
+
+    //log in
+    if(opt == 'a'){
+        string username, passwd;
+        cookie c;
+        do{
+            cout << "=== Log In ===\n";
+            
+            cout << "Username: ";
+            cin >> username;
+            cout << "Password: ";
+            cin >> passwd;
+
+        //keep forcing them to log in until they get the password right
+        }while(loginAsUser(username, passwd, &c) < 0);
+
+        cout << "Login Successful!!\n\n";
+        cout << "Welcome back " << c.user << "!\n";
+        cout << "Login token = " << c.token << "\n";
+    }
 
     return 0;
 }

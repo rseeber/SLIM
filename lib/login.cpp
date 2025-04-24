@@ -268,11 +268,16 @@ int generateCookie(int userID, cookie* cook){
     //This relies on the basic assumption that the epoch started more than COOKIE_EXPIRY_LEN_SECONDS ago.
     time_t expiry = time(nullptr) + COOKIE_EXPIRY_LEN_SECONDS;
     
+    //determine username
+    list<login>::iterator l_it; //login iterator
+    findUserByID(userID, &l_it);
+    string username = l_it->user;
+
     //create the cookie struct
     cookie c;
     //assign values
     c.userID = userID;
-    //c.user = user; //depricated
+    c.user = username;
     c.token = token;
     c.expiry = expiry;
     //check to see if we already have this user in our cookie database

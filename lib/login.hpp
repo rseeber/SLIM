@@ -13,7 +13,7 @@ struct login {
 
 struct cookie {
     int userID;
-    //string user;    //depricated, phase out
+    string user;    //Do not use username for verification. userID's are the only unique ID.
     unsigned int token;
     time_t expiry;
 };
