@@ -160,7 +160,7 @@ int logout(unsigned int token){
 
 //searches database for an unexpired cookie with the given token value. Returns the associated userID, or -1 on failure.
 int validateToken(unsigned int token){
-    //check if our user exists within the cookie database (NOTE: searching the cookie database looks only at associated username!!)
+    //check if the given token exists in the cookie database
     list<cookie>::iterator it = find(myCookies.begin(), myCookies.end(), token);
 
     //if we found the cookie
@@ -386,7 +386,7 @@ bool operator==(const login& a, const int& b){
     return (a.userID == b);
 }
 
-//compare cookies
+//compare cookies with userID
 bool operator==(const cookie& a, const cookie& b){
     return (a.userID == b.userID);
 }
