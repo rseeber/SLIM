@@ -18,7 +18,12 @@ struct cookie {
     time_t expiry;
 };
 
-// === user space functions ===
+//returns a list of logins corresponding to valid cookies in our cookie DB
+list<login> getLoggedInUsers();
+
+// wrapper function for getLoggedInUsers(), to simply print 
+// username and email of each user, with a newline seperating each user.
+string getLoggedInUsers_string();
 
 //creates a new user in the database with the given info, unless that username is already taken. Returns 0 on sucess, or -1 on error.
 int addUser(string user, string email, string passwd);

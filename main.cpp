@@ -17,14 +17,31 @@ using namespace std;
 
 int createSingleUser();
 int createUsersInteractive();
+int userLogin();
 
 int main(int argc, char** argv){
     //interactive mode
-    if(argc == 2 && strcmp(argv[1], "-i") == 0){
-        return createUsersInteractive();
+    if(argc == 2){
+        //interactive user creation
+        if(strcmp(argv[1], "-i") == 0){
+            return createUsersInteractive();
+        }
+        //login as user
+        if(strcmp(argv[1], "-l") == 0){
+            return userLogin();
+        }
     }
     //just make a single default value user
     return createSingleUser();
+}
+
+int userLogin(){
+
+    initCookieDB();
+    //print logged in users
+    
+
+    return 0;
 }
 
 int createUsersInteractive(){

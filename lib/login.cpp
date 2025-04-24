@@ -47,6 +47,44 @@ void printUser(login l, int i){
     cout << "[" << i++ << "]: " << l.user << "\t" << l.email << "\t" << l.passHash << "\t" << l.salt << endl;
 }
 
+//returns a list of logins corresponding to valid cookies in our cookie DB
+list<login> getLoggedInUsers(){
+    //initialize an empty list of logged in users
+    list<login> users;
+    //iterate through each cookie in the db
+    for(cookie c : myCookies){
+        //get the userID by validating it (to prove it's not expired!!)
+        int userID;
+        if((userID = validateToken(c.token)) < 0){
+            //cookie is expired, skip it!
+            continue;
+        }
+        //get an iterator for logins
+        list<login>::iterator it;
+        //point the iterator to the user who owns the cookie, in our login DB
+        findUserByID(userID, &it);
+        //append that login VALUE to our list of logged in users
+        users.push_back(*it);
+    }
+    //return our list of logged in users
+    return users;
+}
+
+// wrapper function for getLoggedInUsers(), to simply print 
+// username and email of each user, with a newline seperating each user.
+string getLoggedInUsers_string(){
+    //collect all the logged in users as a list
+    list<login> users = getLoggedInUsers();
+
+    string output = "";
+    //iterate through each logged in user
+    for(login l : users){
+        //append the username and email to the output, followed by newline
+        output += l.user + "\t" + l.email + "\n";
+    }
+    return output;
+}
+
 //loads the database into ram as a list of login structs
 void initDB(){
     string line;
