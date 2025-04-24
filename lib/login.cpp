@@ -80,8 +80,12 @@ string getLoggedInUsers_string(){
     //iterate through each logged in user
     for(login l : users){
         //append the username and email to the output, followed by newline
-        output += l.user + "\t" + l.email + "\n";
+        output += l.user;
+        output += "\t";
+        output += l.email;
+        output += "\n";
     }
+    cout << "output = " << output;
     return output;
 }
 
@@ -120,10 +124,10 @@ void initCookieDB(){
         ofs.close();
     }
     //take formatted input using >> operator. Expect 3 input fields per line.
-    for(int i = 0; ifs.good(); ++i){
+    else for(int i = 0; ifs.good(); ++i){
         cookie c;
         //now break up the line into valid pieces to save as each part of the cookie
-        ifs >> c.userID >> c.token >> c.expiry;
+        ifs >> c.userID >> c.user >> c.token >> c.expiry;
 
         //append cookie to myLogins
         myCookies.push_back(c);
@@ -150,7 +154,7 @@ void saveCookieDB(){
     ofstream ofs("data/cookies.txt");
     for(cookie c : myCookies){
         //write the data from the list of structs into the text file
-        ofs << c.userID << "\t" << c.token << "\t" << c.expiry;
+        ofs << c.userID << "\t" << c.user << "\t" << c.token << "\t" << c.expiry;
         
         //only print a newline if we're NOT on the last entry
         //NOTE: if a user can smuggle two cookies into our db, he can mess up our db formatting
@@ -205,7 +209,7 @@ int loginAsUser(string user, string passwd, cookie* cook){
         cout << "Database Hash: " << l.passHash << endl;
         return -1;
     }
-    cout << "Login successful, generating random login token/cookie...\n";
+    //cout << "Login successful, generating random login token/cookie...\n";
     //set a unique, random cookie value. And return success value.
     return generateCookie(l.userID, cook);
 }
@@ -226,6 +230,25 @@ int logout(unsigned int token){
     return -1;
 }
 
+//wrapper for logout, which find the token by getting the userID from 
+//the login db, then getting the token from the cookei db.
+int logout(string username){
+    //get the userID
+    int userID;
+    login l;
+    findUserByName(username, &l);
+    userID = l.userID;
+
+    //find the cookie struct, so we can extract the token from it
+    list<cookie>::iterator it;
+    if(findCookieByUserID(userID, &it) < 0){
+        return -1;
+    }
+
+    //call inner function to logout with the token.
+    return logout(it->token);
+}
+
 //searches database for an unexpired cookie with the given token value. Returns the associated userID, or -1 on failure.
 int validateToken(unsigned int token){
     //check if the given token exists in the cookie database
@@ -235,9 +258,16 @@ int validateToken(unsigned int token){
     if(it != myCookies.end()){
         //check if it's expired
         time_t t = time(nullptr);
+        time_t diff = it->expiry - t;
+        cout << "Current time = " << t << endl;
+        cout << "Expiry time = " << it->expiry << endl;
+        cout << "diff = " << diff << endl;
+        cout << "case2: " << (t >= 0) << endl;
         //we check t < 0 in case time() returned an error
-        if(it->expiry > t && !(t < 0)){
-            return it->userID;
+        if(diff > 0 && t >= 0){
+            cout << "valid cookie for " << it->user << endl;
+            int buf = it->userID;
+            return buf;
         }
     }
     return -1;
@@ -270,7 +300,10 @@ int generateCookie(int userID, cookie* cook){
     
     //determine username
     list<login>::iterator l_it; //login iterator
-    findUserByID(userID, &l_it);
+    if(findUserByID(userID, &l_it) < 0){
+        cout << "Error: couldn't find user with id = " << userID << endl;
+        return -1;
+    }
     string username = l_it->user;
 
     //create the cookie struct
@@ -301,6 +334,16 @@ int findUserByID(int userID, list<login>::iterator *it){
     *it = find(myLogins.begin(), myLogins.end(), userID);
     //if not found
     if(*it == myLogins.end()){
+        return -1;
+    }
+    return 0;
+}
+
+//finds a cookie from the cookie database, and puts the iterator at the location pointed to by *it. 
+// Returns 0 on success or -1 on error.
+int findCookieByUserID(int userID, list<cookie>::iterator *it){
+    *it = find(myCookies.begin(), myCookies.end(), userID);
+    if(*it == myCookies.end()){
         return -1;
     }
     return 0;

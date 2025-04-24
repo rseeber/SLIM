@@ -46,6 +46,10 @@ int loginAsUser(string user, string passwd, cookie* cook);
 //revokes a cookie token early. Returns the userID of the logged out user on success, or -1 on error.
 int logout(unsigned int token);
 
+//wrapper for logout, which find the token by getting the userID from 
+//the login db, then getting the token from the cookei db.
+int logout(string username);
+
 //searches database for an unexpired cookie with the given token value. Returns the associated userID, or -1 on failure.
 int validateToken(unsigned int token);
 
@@ -63,3 +67,20 @@ void saveDB();
 
 //saves the database back into cookies.txt
 void saveCookieDB();
+
+//literally just print the whole database
+void printDB();
+
+
+
+
+//returns the login for user on the login pointed to by log
+int findUserByName(string user, login* log);
+
+//finds a user from the users database, and puts the iterator at the location pointed to by *it. 
+// Returns 0 on success or -1 on error.
+int findUserByID(int userID, list<login>::iterator *it);
+
+//finds a cookie from the cookie database, and puts the iterator at the location pointed to by *it. 
+// Returns 0 on success or -1 on error.
+int findCookieByUserID(int userID, list<cookie>::iterator *it);

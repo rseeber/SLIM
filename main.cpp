@@ -18,8 +18,12 @@ using namespace std;
 int createSingleUser();
 int createUsersInteractive();
 int userLogin();
+void handleLogin();
+
 
 int main(int argc, char** argv){
+    initDB();
+
     //interactive mode
     if(argc == 2){
         //interactive user creation
@@ -39,8 +43,12 @@ int userLogin(){
 
     initCookieDB();
     //print logged in users
-    cout << "===================\n" << "Logged in users" << "===================\n";
-    cout << getLoggedInUsers_string() << "\n\n";
+    cout << 
+        "===================\n" << 
+        " Logged in users \n" << 
+        "===================\n";
+    string users = getLoggedInUsers_string();
+    cout << users << "\n\n";
 
     // Login or log out
     cout << "What do you want to do?\n\ta) log a user in\n\tb) log out a user\n\n> ";
@@ -49,30 +57,50 @@ int userLogin(){
 
     //log in
     if(opt == 'a'){
-        string username, passwd;
-        cookie c;
-        do{
-            cout << "=== Log In ===\n";
-            
-            cout << "Username: ";
-            cin >> username;
-            cout << "Password: ";
-            cin >> passwd;
+        handleLogin();
+    }
+    //logout
+    else if(opt == 'b'){
+        cout << "What user would you like to log out?\n\n";
+        cout << "Username: ";
+        string username;
+        cin >> username;
 
-        //keep forcing them to log in until they get the password right
-        }while(loginAsUser(username, passwd, &c) < 0);
-
-        cout << "Login Successful!!\n\n";
-        cout << "Welcome back " << c.user << "!\n";
-        cout << "Login token = " << c.token << "\n";
+        //logout with username
+        logout(username);
     }
 
+    saveCookieDB();
+    
     return 0;
 }
 
-int createUsersInteractive(){
-    initDB();
+void handleLogin(){
+    string username, passwd;
+    cookie c;
+    int repeat = 0;
+    //login attempt loop
+    do{
+        if(repeat){
+            cout << "Oops! Wrong username or password. Try again.\n";
+        }
+        cout << "=== Log In ===\n";
+        
+        cout << "Username: ";
+        cin >> username;
+        cout << "Password: ";
+        cin >> passwd;
+        repeat = 1;
 
+    //keep forcing them to log in until they get the password right
+    }while(loginAsUser(username, passwd, &c) < 0);
+
+    cout << "Login Successful!!\n\n";
+    cout << "Welcome back " << c.user << "!\n";
+    cout << "Login token = " << c.token << "\n";
+}
+
+int createUsersInteractive(){
     int cnt;
     cout << "How many users do you wish to create?\n> ";
     cin >> cnt;
@@ -131,9 +159,6 @@ int createUsersInteractive(){
 }
 
 int createSingleUser(){
-
-    initDB();
-
     string user = "River";
     string email = "river@email.com";
     string password = "badPassword1";

@@ -11,20 +11,14 @@ bool cookiesEqual(cookie c1, cookie c2);
 //write the requested data to the buffer pointed to by buf
 int getUserData(string user, string cookie, int dataID, string* buf);
 
-//returns the login for user on the login pointed to by log
-int findUserByName(string user, login* log);
 
-//finds a user from the users database, and puts the iterator at the location pointed to by *it. 
-// Returns 0 on success or -1 on error.
-int findUserByID(int userID, list<login>::iterator *it);
 
 //returns the current username for a given userID
 string getUsername(int userID);
 
 
 
-//literally just print the whole database
-void printDB();
+
 
 //prints the specified login
 void printUser(login l, int i);
