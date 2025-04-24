@@ -4,7 +4,7 @@ This project is a C++ library which can be used to facilitate cryptographically 
 
 The management of these temporary login tokens is fully managed by the library, including the automatic revocation of the tokens after some arbitrary time interval. (still partially in development)
 
-The login database (which contains usernames and password hashes) can be stored to a file on the disk, and then re-loaded into memory between server downtimes. The login tokens cannot be saved in such manner, due to security concerns.
+The login database (which contains usernames and password hashes) can be stored to a file on the disk, and then re-loaded into memory between server downtimes. The same can be done seperately for the login tokens, if desired.
 
 # Example Usage
 

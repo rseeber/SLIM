@@ -13,7 +13,7 @@ struct login {
 
 struct cookie {
     int userID;
-    string user;    //depricated, phase out
+    //string user;    //depricated, phase out
     unsigned int token;
     time_t expiry;
 };
@@ -48,8 +48,13 @@ int validateToken(unsigned int token);
 int deleteUser(int userID);
 
 //load the database into ram as an array of structs
-int initDB();
+void initDB();
+
+//load the cookie database into ram as an array of structs
+void initCookieDB();
 
 //saves the database back into users.txt
 void saveDB();
 
+//saves the database back into cookies.txt
+void saveCookieDB();

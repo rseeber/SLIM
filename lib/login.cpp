@@ -48,7 +48,7 @@ void printUser(login l, int i){
 }
 
 //loads the database into ram as a list of login structs
-int initDB(){
+void initDB(){
     string line;
     ifstream ifs("data/users.txt");
     //check if the file exists
@@ -64,19 +64,33 @@ int initDB(){
         //now break up the line into valid pieces to save as each part of the login
         ifs >> l.userID >> l.user >> l.email >> l.passHash >> l.salt;
 
-        //don't save empty values to myLogins
-        //NOTE: I thinkk
-        //we don't need this because a value won't be read into an int until a non-empty character is read
-      //if(l.userID == ""){
-      //    continue;
-      //}
-
         //append l to myLogins
         myLogins.push_back(l);
     }
     ifs.close();
+}
 
-    return 0;
+void initCookieDB(){
+    //written VERY similiar to initDB() function
+    string line;
+    ifstream ifs("data/cookies.txt");
+    //check if the file exists
+    if(!ifs.good()){
+        //create the file if it does not exist
+        ofstream ofs("data/cookies.txt");
+        ofs << "";
+        ofs.close();
+    }
+    //take formatted input using >> operator. Expect 3 input fields per line.
+    for(int i = 0; ifs.good(); ++i){
+        cookie c;
+        //now break up the line into valid pieces to save as each part of the cookie
+        ifs >> c.userID >> c.token >> c.expiry;
+
+        //append cookie to myLogins
+        myCookies.push_back(c);
+    }
+    ifs.close();
 }
 
 void saveDB(){
@@ -87,6 +101,22 @@ void saveDB(){
         
         //only print a newline if we're NOT on the last entry
         if(myLogins.back().userID != l.userID){   //compare the usernames
+            ofs << endl;
+        }
+    }
+    ofs.close();
+}
+
+void saveCookieDB(){
+    //written VERY similiar to saveDB() function
+    ofstream ofs("data/cookies.txt");
+    for(cookie c : myCookies){
+        //write the data from the list of structs into the text file
+        ofs << c.userID << "\t" << c.token << "\t" << c.expiry;
+        
+        //only print a newline if we're NOT on the last entry
+        //NOTE: if a user can smuggle two cookies into our db, he can mess up our db formatting
+        if(myCookies.back().userID != c.userID){   //compare the userID
             ofs << endl;
         }
     }
@@ -190,30 +220,32 @@ int deleteUser(int userID){
 //generates a cookie, setting it at the pointer cook, as well as REGISTERING IT IN THE COOKIE DATABASE
 int generateCookie(int userID, cookie* cook){
     
+    //generate random bytes for the token value, and assign them to `token`.
     unsigned int token;
     if(RAND_bytes((unsigned char*)(&token), sizeof(int)) < 0){
         cout << "error: couldn't generate random data\n";
         return -1;
     }
     //NOTE: if time() fails, it returns -1, so the token is instantly expired (it was created in 1970).
-    //This relies on the assumption that the epoch started more than COOKIE_EXPIRY_LEN_SECONDS ago.
+    //This relies on the basic assumption that the epoch started more than COOKIE_EXPIRY_LEN_SECONDS ago.
     time_t expiry = time(nullptr) + COOKIE_EXPIRY_LEN_SECONDS;
     
-    //create the cookie
+    //create the cookie struct
     cookie c;
+    //assign values
     c.userID = userID;
     //c.user = user; //depricated
     c.token = token;
     c.expiry = expiry;
     //check to see if we already have this user in our cookie database
-    list<cookie>::iterator it = find(myCookies.begin(), myCookies.end(), c);
+    list<cookie>::iterator it = find(myCookies.begin(), myCookies.end(), c);    //find(cookie) uses cookie.userID to compare
     //if the user already has a registered cookie, delete the old one, and use the new one
     if(it != myCookies.end()){
         *it = c;
     }
     //otherwise, add a new cookie entry to the cookie database
     myCookies.push_back(c);
-    myCookies.sort();
+    myCookies.sort();   //unnecessary, since we're using a linear search algorithm. Remove?
 
     //assign the value of cook to be our newly generated cookie entry
     *cook = c;
@@ -410,10 +442,6 @@ bool cookiesEqual(cookie c1, cookie c2){
     if(c1.userID != c2.userID)
         return false;
 
-    //check username
-    if(c1.user == c2.user)
-        return false;
-    
     //check token value
     if(c1.token != c2.token)
         return false;
