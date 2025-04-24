@@ -56,6 +56,7 @@ list<login> getLoggedInUsers(){
         //get the userID by validating it (to prove it's not expired!!)
         int userID;
         if((userID = validateToken(c.token)) < 0){
+            cout << "Skipping expired token!\n";
             //cookie is expired, skip it!
             continue;
         }
@@ -80,12 +81,8 @@ string getLoggedInUsers_string(){
     //iterate through each logged in user
     for(login l : users){
         //append the username and email to the output, followed by newline
-        output += l.user;
-        output += "\t";
-        output += l.email;
-        output += "\n";
+        output += "  * " + l.user + "\n";
     }
-    cout << "output = " << output;
     return output;
 }
 
@@ -178,10 +175,11 @@ int addUser(string user, string email, string passwd){
     l.email = email;
 
     //generate a random userID
-    unsigned int id;
+    int id;
     //generate random userID. If a user with that ID already exists, generate a new one until it's unique.
     while(RAND_bytes((unsigned char*)&id, sizeof(int)) < 0 && findUserByID(id, nullptr) >= 0);
-    l.userID = id;
+    //we do abs() so we can return -1 on error for lookups
+    l.userID = abs(id);
 
     //password hashing
     hashPasswd(passwd, &l.salt, &l.passHash);
@@ -242,6 +240,7 @@ int logout(string username){
     //find the cookie struct, so we can extract the token from it
     list<cookie>::iterator it;
     if(findCookieByUserID(userID, &it) < 0){
+        cout << "Error: couldn't find user with userID " << userID << ", and username " << username <<".\n";
         return -1;
     }
 
@@ -258,16 +257,12 @@ int validateToken(unsigned int token){
     if(it != myCookies.end()){
         //check if it's expired
         time_t t = time(nullptr);
+        //distance between now and when the cookie expires, in seconds
+        // positive means it's not expired yet (time till expiry)
         time_t diff = it->expiry - t;
-        cout << "Current time = " << t << endl;
-        cout << "Expiry time = " << it->expiry << endl;
-        cout << "diff = " << diff << endl;
-        cout << "case2: " << (t >= 0) << endl;
         //we check t < 0 in case time() returned an error
         if(diff > 0 && t >= 0){
-            cout << "valid cookie for " << it->user << endl;
-            int buf = it->userID;
-            return buf;
+            return it->userID;
         }
     }
     return -1;
@@ -342,7 +337,9 @@ int findUserByID(int userID, list<login>::iterator *it){
 //finds a cookie from the cookie database, and puts the iterator at the location pointed to by *it. 
 // Returns 0 on success or -1 on error.
 int findCookieByUserID(int userID, list<cookie>::iterator *it){
-    *it = find(myCookies.begin(), myCookies.end(), userID);
+    cookie c;
+    c.userID = userID;
+    *it = find(myCookies.begin(), myCookies.end(), c);
     if(*it == myCookies.end()){
         return -1;
     }

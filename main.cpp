@@ -47,8 +47,7 @@ int userLogin(){
         "===================\n" << 
         " Logged in users \n" << 
         "===================\n";
-    string users = getLoggedInUsers_string();
-    cout << users << "\n\n";
+    cout << getLoggedInUsers_string() << "\n\n";
 
     // Login or log out
     cout << "What do you want to do?\n\ta) log a user in\n\tb) log out a user\n\n> ";
