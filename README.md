@@ -41,4 +41,4 @@ The plan for this project is to make it be sufficiently hardened so that it can 
 - Create additional options for hashing methods, usage of pepper, etc
 - Create detailed documentation on how to use each interface function
     + Create general reccomendations on how programs should be written to avoid problems (ex: writing to the disk periodically, not just when terminating the program)
-- Apply an open-source, copyleft license (LGPL?)
+- ~~Apply an open-source, copyleft license (LGPL?)~~ (done)
