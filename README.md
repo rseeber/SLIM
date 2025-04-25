@@ -23,7 +23,7 @@ Finally, when you compile your program, you will need to link your program's cod
 
 
 ## Method 2: Compiling the library yourself
-Although the object files are provided pre-compiled, it is possible for you to compile the object files yourself. To do so, aquire a copy of the `lib/` directory in this repo. From there, pass the `-c` flag to gcc to compile the object file: `g++ -c lib/login.cpp -o bin/login.o`. After that, use your resulting object file the same way you do in Method 1 to compile your project.
+Although the object files are provided pre-compiled, it is possible for you to compile the object files yourself. To do so, aquire a copy of all the source code files for this library. From there, pass the `-c` flag to gcc to compile the object file: `g++ -c login.cpp -o bin/login.o`. After that, use your resulting object file the same way you do in Method 1 to compile your project.
 
 # Roadmap
 
