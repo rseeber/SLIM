@@ -1,3 +1,22 @@
+/*
+ * Project: Simple LogIn Manager (SLIM) Library
+ * Author: River Seeber
+ * Date: April 2025
+ * Version: 1.0.0
+ */
+
+/*
+ *  COPYRIGHT 2025 River Seeber.
+ *
+ *  This file is part of SLIM (Simple LogIn Manager).
+ *
+ *  SLIM is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ *
+ *  SLIM is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public License along with SLIM. If not, see <https://www.gnu.org/licenses/>. 
+ */
+
 #include "login.hpp"
 
 // === internal functions ===
