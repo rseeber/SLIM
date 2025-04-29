@@ -92,8 +92,11 @@ void saveCookieDB();
 //literally just print the whole database
 void printDB();
 
+//prints the specified login
+void printUser(login l, int i);
 
-
+//returns the current username for a given userID
+string getUsername(int userID);
 
 //returns the login for user on the login pointed to by log
 int findUserByName(string user, login* log);

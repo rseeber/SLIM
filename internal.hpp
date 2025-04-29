@@ -27,26 +27,14 @@ int generateCookie(int userID, cookie* cook);
 //checks if both cookies have identical values in all fields
 bool cookiesEqual(cookie c1, cookie c2);
 
+//DEPRICATED/EMPTY FUNCTION
 //write the requested data to the buffer pointed to by buf
 int getUserData(string user, string cookie, int dataID, string* buf);
-
-
-
-//returns the current username for a given userID
-string getUsername(int userID);
-
-
-
-
-
-//prints the specified login
-void printUser(login l, int i);
-
-
 
 //converts binary data into the cleaner hexidecimal format
 void toHex(unsigned char* hashData, __ssize_t dataLen, char* hashString);
 
+//DEPRICATED/EMPTY FUNCTION
 //converts Hexidecimal text back into binary data
 void toBinary(const char* hex, size_t N, unsigned char* data);
 
