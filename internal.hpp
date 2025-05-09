@@ -32,13 +32,10 @@ int getUserData(string user, string cookie, int dataID, string* buf);
 void toHex(unsigned char* hashData, __ssize_t dataLen, char* hashString);
 
 
-//TODO: change this. We should NOT have function overloads that perform
-// substantially different behaviors (notably, one takes IN salt, and one OUTPUTS it to a pointer location)
-
-//hashes the passwd with the salt, storing it at the buffer pointed to by buf
+//hashes the passwd with the provided salt, storing it at the buffer pointed to by buf
 int hashPasswd(string passwd, string salt, string* buf);
 
-//hashes passwd, generating a new salt stored at *salt. Hash is stored at *buf.
-int hashPasswd(string passwd, string* salt, string* buf);
+//hashes passwd, generating a NEW salt stored at *salt. Hash is stored at *buf.
+int hashPasswd_generateSalt(string passwd, string* salt, string* buf);
 
 void exit();

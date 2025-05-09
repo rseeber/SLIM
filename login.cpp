@@ -195,7 +195,7 @@ int addUser(string user, string email, string passwd){
     l.userID = abs(id);
 
     //password hashing
-    hashPasswd(passwd, &l.salt, &l.passHash);
+    hashPasswd_generateSalt(passwd, &l.salt, &l.passHash);
 
     //append l to myLogins
     myLogins.push_back(l);
@@ -382,7 +382,7 @@ int editPasswd(int userID, string newPass){
     }
     //generate a new password
     string passHash, salt;
-    if(hashPasswd(newPass, &salt, &passHash) < 0){
+    if(hashPasswd_generateSalt(newPass, &salt, &passHash) < 0){
         //couldn't hash password. Try again.
         return -1;
     }
@@ -459,7 +459,7 @@ int hashPasswd(string passwd, string salt, string* buf){
 }
 
 //Hashes a password that you do not have the salt for, and assignes the salt to the pointer you pass in
-int hashPasswd(string passwd, string* salt, string* buf){
+int hashPasswd_generateSalt(string passwd, string* salt, string* buf){
     char* saltData = (char*)malloc(SALT_LEN + 1);   //binary data
     //get random bytes for salt
     if(RAND_bytes((unsigned char*)saltData, SALT_LEN) < 0){
