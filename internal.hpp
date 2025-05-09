@@ -37,5 +37,3 @@ int hashPasswd(string passwd, string salt, string* buf);
 
 //hashes passwd, generating a NEW salt stored at *salt. Hash is stored at *buf.
 int hashPasswd_generateSalt(string passwd, string* salt, string* buf);
-
-void exit();
