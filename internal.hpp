@@ -24,9 +24,6 @@
 //generates a unique cookie, saving it to the database, or overwriting any old cookie for that user.
 int generateCookie(int userID, cookie* cook);
 
-//checks if both cookies have identical values in all fields
-bool cookiesEqual(cookie c1, cookie c2);
-
 //DEPRICATED/EMPTY FUNCTION
 //write the requested data to the buffer pointed to by buf
 int getUserData(string user, string cookie, int dataID, string* buf);

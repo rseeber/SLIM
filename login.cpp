@@ -529,23 +529,3 @@ bool operator==(const cookie& a, const unsigned int b){
 bool operator<(const cookie& a, const unsigned int b){
     return a.token < b;
 }
-
-//cookie struct funcs
-
-//checks if both cookies have identical values in all fields
-bool cookiesEqual(cookie c1, cookie c2){
-    //check userID
-    if(c1.userID != c2.userID)
-        return false;
-
-    //check token value
-    if(c1.token != c2.token)
-        return false;
-
-    //check expiry
-    if(c1.expiry == c2.expiry)
-        return false;
-    
-    //if there's no differences, return true
-    return true;
-}
