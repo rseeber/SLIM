@@ -31,11 +31,6 @@ int getUserData(string user, string cookie, int dataID, string* buf);
 //converts binary data into the cleaner hexidecimal format
 void toHex(unsigned char* hashData, __ssize_t dataLen, char* hashString);
 
-//DEPRICATED/EMPTY FUNCTION
-//converts Hexidecimal text back into binary data
-void toBinary(const char* hex, size_t N, unsigned char* data);
-
-
 
 //TODO: change this. We should NOT have function overloads that perform
 // substantially different behaviors (notably, one takes IN salt, and one OUTPUTS it to a pointer location)

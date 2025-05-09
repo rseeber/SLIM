@@ -485,11 +485,6 @@ void toHex(unsigned char* hashData, __ssize_t dataLen, char* hashString){
     }
 }
 
-//converts Hexidecimal text back into binary data
-void toBinary(const char* hex, size_t N, unsigned char* data){
-
-}
-
 //operator overloads used for sorting entries in order to make searching the db efficient
 
 //compare logins
