@@ -103,8 +103,8 @@ int findUserByName(string user, login* log);
 
 //finds a user from the users database, and puts the iterator at the location pointed to by *it. 
 // Returns 0 on success or -1 on error.
-int findUserByID(int userID, list<login>::iterator *it);
+int findUserByID(int userID, login *l);
 
 //finds a cookie from the cookie database, and puts the iterator at the location pointed to by *it. 
 // Returns 0 on success or -1 on error.
-int findCookieByUserID(int userID, list<cookie>::iterator *it);
+int findCookieByUserID(int userID, cookie *c);

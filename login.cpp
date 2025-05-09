@@ -68,12 +68,15 @@ list<login> getLoggedInUsers(){
             //cookie is expired, skip it!
             continue;
         }
-        //get an iterator for logins
-        list<login>::iterator it;
-        //point the iterator to the user who owns the cookie, in our login DB
-        findUserByID(userID, &it);
+        //the current login we're dealing with
+        login l;
+        //find the user and store them on l.
+        if(findUserByID(userID, &l) < 0){
+            printf("Warning: user '%s' exists in the cookieDB, but not in the userDB!\n", c.user);
+            continue;   //if the user doesn't exist in the database, skip them.
+        }
         //append that login VALUE to our list of logged in users
-        users.push_back(*it);
+        users.push_back(l);
     }
     //return our list of logged in users
     return users;
@@ -247,7 +250,8 @@ int logout(string username){
 
     //find the cookie struct, so we can extract the token from it
     list<cookie>::iterator it;
-    if(findCookieByUserID(userID, &it) < 0){
+    cookie c;
+    if(findCookieByUserID(userID, &c) < 0){
         cout << "Error: couldn't find user with userID " << userID << ", and username " << username <<".\n";
         return -1;
     }
@@ -278,13 +282,13 @@ int validateToken(unsigned int token){
 
 //removes a user associated with a given userID from the login database. returns 0 on success, or -1 if no such user exists.
 int deleteUser(int userID){
-    list<login>::iterator it;
-    if(findUserByID(userID, &it) < 0){
+    login l;
+    if(findUserByID(userID, &l) < 0){
         //error, can't find user
         return -1;
     }
     //remove the user
-    myLogins.remove(*it);
+    myLogins.remove(l);
     return 0;
 }
 
@@ -302,12 +306,12 @@ int generateCookie(int userID, cookie* cook){
     time_t expiry = time(nullptr) + COOKIE_EXPIRY_LEN_SECONDS;
     
     //determine username
-    list<login>::iterator l_it; //login iterator
-    if(findUserByID(userID, &l_it) < 0){
+    login l;
+    if(findUserByID(userID, &l) < 0){
         cout << "Error: couldn't find user with id = " << userID << endl;
         return -1;
     }
-    string username = l_it->user;
+    string username = l.user;
 
     //create the cookie struct
     cookie c;
@@ -316,8 +320,10 @@ int generateCookie(int userID, cookie* cook){
     c.user = username;
     c.token = token;
     c.expiry = expiry;
+
     //check to see if we already have this user in our cookie database
     list<cookie>::iterator it = find(myCookies.begin(), myCookies.end(), c);    //find(cookie) uses cookie.userID to compare
+    findCookieByUserID(userID, &it);
     //if the user already has a registered cookie, delete the old one, and use the new one
     if(it != myCookies.end()){
         *it = c;
@@ -331,26 +337,34 @@ int generateCookie(int userID, cookie* cook){
     return 0;
 }
 
-//finds a user from the users database, and puts the iterator at the location pointed to by *it. 
-// Returns 0 on success or -1 on error.
-int findUserByID(int userID, list<login>::iterator *it){
-    *it = find(myLogins.begin(), myLogins.end(), userID);
+//finds a user from the users database, and stores the login at the location pointed to by *l. 
+// Returns 0 on success or -1 if the user was not found.
+int findUserByID(int userID, login *l){
+    list<login>::iterator it = find(myLogins.begin(), myLogins.end(), userID);
     //if not found
-    if(*it == myLogins.end()){
+    if(it == myLogins.end()){
         return -1;
     }
+
+    //convert iterator to login pointer
+    *l = *it;
     return 0;
 }
 
 //finds a cookie from the cookie database, and puts the iterator at the location pointed to by *it. 
 // Returns 0 on success or -1 on error.
-int findCookieByUserID(int userID, list<cookie>::iterator *it){
-    cookie c;
-    c.userID = userID;
-    *it = find(myCookies.begin(), myCookies.end(), c);
-    if(*it == myCookies.end()){
+int findCookieByUserID(int userID, cookie c){
+    list<cookie>::iterator it;
+    cookie tempCook;    //this allows us to use find().
+    tempCook.userID = userID;
+    //note: we cannot use function overloads, since
+    // operator<(int, cookie) is already defined to work in terms
+    // of token -- not userID.
+    it = find(myCookies.begin(), myCookies.end(), tempCook);
+    if(it == myCookies.end()){
         return -1;
     }
+    c = *it;
     return 0;
 }
 
