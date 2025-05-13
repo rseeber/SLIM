@@ -1,8 +1,8 @@
 /*
  * Project: Simple LogIn Manager (SLIM) Library
  * Author: River Seeber
- * Date: April 2025
- * Version: 1.0.0
+ * Date: May 2025
+ * Version: 1.1.0 development
  */
 
 /*
