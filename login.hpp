@@ -98,6 +98,12 @@ void printUser_i(login l, int i);
 //prints the username, email, password hash, and salt. All entries tab spaced, and ended with a newline.
 void printUser(login l);
 
+//wrapper for printCookie() that prints given index as well
+void printCookie_i(cookie c, int i);
+
+//prints info for a cookie: userID, username, token, and expiry timestamp
+void printCookie(cookie c);
+
 //returns the current username for a given userID
 string getUsername(int userID);
 

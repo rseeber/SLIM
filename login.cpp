@@ -50,13 +50,25 @@ void printDB(){
 
 // wrapper for printUser, except that it prints a given index number, useful for outputting a database.
 void printUser_i(login l, int i){
-    cout << "[" << i++ << "]: ";
+    cout << "[" << i << "]: ";
     printUser(l);
 }
+
 
 //prints the username, email, password hash, and salt. All entries tab spaced, and ended with a newline.
 void printUser(login l){
     cout << l.user << "\t" << l.email << "\t" << l.passHash << "\t" << l.salt << endl;
+}
+
+//wrapper for printCookie() that prints given index as well
+void printCookie_i(cookie c, int i){
+    cout << "[" << i << "]";
+    printCookie(c);
+}
+
+//prints info for a cookie: userID, username, token, and expiry timestamp
+void printCookie(cookie c){
+    cout << c.userID << "\t" << c.user << "\t" << c.token << "\t" << c.expiry << endl;
 }
 
 //returns a list of logins corresponding to valid cookies in our cookie DB
