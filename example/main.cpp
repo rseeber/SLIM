@@ -45,7 +45,7 @@ int userLogin(){
     //print logged in users
     cout << 
         "===================\n" << 
-        " Logged in users \n" << 
+        "  Logged in users \n" << 
         "===================\n";
     cout << getLoggedInUsers_string() << "\n\n";
 
