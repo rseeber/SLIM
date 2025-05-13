@@ -322,15 +322,14 @@ int generateCookie(int userID, cookie* cook){
     c.expiry = expiry;
 
     //check to see if we already have this user in our cookie database
-    list<cookie>::iterator it = find(myCookies.begin(), myCookies.end(), c);    //find(cookie) uses cookie.userID to compare
-    findCookieByUserID(userID, &it);
+    cookie tmpC;
     //if the user already has a registered cookie, delete the old one, and use the new one
-    if(it != myCookies.end()){
-        *it = c;
+    if(findCookieByUserID(userID, &tmpC) == 0){
+        //remove the cookie from our DB
+        myCookies.remove(tmpC);
     }
-    //otherwise, add a new cookie entry to the cookie database
+    // add a new cookie entry to the cookie database
     myCookies.push_back(c);
-    myCookies.sort();   //unnecessary, since we're using a linear search algorithm. Remove?
 
     //assign the value of cook to be our newly generated cookie entry
     *cook = c;
@@ -353,10 +352,13 @@ int findUserByID(int userID, login *l){
 
 //finds a cookie from the cookie database, and puts the iterator at the location pointed to by *it. 
 // Returns 0 on success or -1 on error.
-int findCookieByUserID(int userID, cookie c){
-    list<cookie>::iterator it;
-    cookie tempCook;    //this allows us to use find().
+int findCookieByUserID(int userID, cookie *c){
+    list<cookie>::iterator it;  //the iterator that will point to our found cookie
+
+    //this allows us to use find(), as it will compare the userID's of the two cookies
+    cookie tempCook;
     tempCook.userID = userID;
+
     //note: we cannot use function overloads, since
     // operator<(int, cookie) is already defined to work in terms
     // of token -- not userID.
@@ -364,28 +366,28 @@ int findCookieByUserID(int userID, cookie c){
     if(it == myCookies.end()){
         return -1;
     }
-    c = *it;
+    *c = *it;
     return 0;
 }
 
 //returns the current username for a given userID
 string getUsername(int userID){
-    list<login>::iterator it;
+    login l;
     //find the login object
-    if(findUserByID(userID, &it) < 0){
+    if(findUserByID(userID, &l) < 0){
         //error
         return "";
     }
     // pull out the username
-    return it->user;
+    return l.user;
 }
 
 //changes the password for the user with the given userID. Generates new salt as well.
 // NOTE: the server should verify the user before running this function
 int editPasswd(int userID, string newPass){
     //find user
-    list<login>::iterator it;
-    if (findUserByID(userID, &it) < 0){
+    login l;
+    if (findUserByID(userID, &l) < 0){
         //not found
         return -1;
     }
@@ -396,8 +398,8 @@ int editPasswd(int userID, string newPass){
         return -1;
     }
     //save the passHash and salt to our user.
-    it->passHash = passHash;
-    it->salt = salt;
+    l.passHash = passHash;
+    l.salt = salt;
     return 0;
 }
 
@@ -405,13 +407,13 @@ int editPasswd(int userID, string newPass){
 // NOTE: the server should verify the user before running this function
 int editUsername(int userID, string newUsername){
     //find user
-    list<login>::iterator it;
-    if(findUserByID(userID, &it) < 0){
+    login l;
+    if(findUserByID(userID, &l) < 0){
         return -1;
     }
 
     //set the username
-    it->user = newUsername;
+    l.user = newUsername;
     return 0;
 
 }
@@ -420,13 +422,13 @@ int editUsername(int userID, string newUsername){
 // NOTE: the server should verify the user before running this function
 int editEmail(int userID, string newEmail){
     //find user
-    list<login>::iterator it;
-    if(findUserByID(userID, &it) < 0){
+    login l;
+    if(findUserByID(userID, &l) < 0){
         return -1;
     }
 
     //change email
-    it->email = newEmail;
+    l.email = newEmail;
     return 0;
 }
 
