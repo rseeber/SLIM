@@ -92,6 +92,9 @@ void saveCookieDB();
 //literally just print the whole database
 void printDB();
 
+// same as printDB(), but it prints cookies, not users
+void printCookieDB();
+
 // wrapper for printUser, except that it prints a given index number, useful for outputting a database.
 void printUser_i(login l, int i);
 

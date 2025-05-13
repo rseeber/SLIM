@@ -48,6 +48,13 @@ void printDB(){
     }
 }
 
+void printCookieDB(){
+    int i = 0;
+    for(cookie c : myCookies){
+        printCookie_i(c, i++);
+    }
+}
+
 // wrapper for printUser, except that it prints a given index number, useful for outputting a database.
 void printUser_i(login l, int i){
     cout << "[" << i << "]: ";
@@ -62,7 +69,7 @@ void printUser(login l){
 
 //wrapper for printCookie() that prints given index as well
 void printCookie_i(cookie c, int i){
-    cout << "[" << i << "]";
+    cout << "[" << i << "]: ";
     printCookie(c);
 }
 
@@ -80,7 +87,7 @@ list<login> getLoggedInUsers(){
         //get the userID by validating it (to prove it's not expired!!)
         int userID;
         if((userID = validateToken(c.token)) < 0){
-            cout << "Skipping expired token!\n";
+            //cout << "Skipping expired token!\n";
             //cookie is expired, skip it!
             continue;
         }
