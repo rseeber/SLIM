@@ -92,8 +92,11 @@ void saveCookieDB();
 //literally just print the whole database
 void printDB();
 
-//prints the specified login
-void printUser(login l, int i);
+// wrapper for printUser, except that it prints a given index number, useful for outputting a database.
+void printUser_i(login l, int i);
+
+//prints the username, email, password hash, and salt. All entries tab spaced, and ended with a newline.
+void printUser(login l);
 
 //returns the current username for a given userID
 string getUsername(int userID);

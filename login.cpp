@@ -32,11 +32,9 @@
 #include <string.h>
 using namespace std;
 
-#define SALT_LEN 16
-#define HASH_LEN 32
-#define API_MAX_LEN 100
-#define COOKIE_EXPIRY_LEN_SECONDS 600   //10 minutes = 60 seconds * 10 = 600 seconds
-
+// A user accessible header file that they compile with the library.
+// It allows them to change default values like hash output length, and cookie expiry time
+#include "config.hpp"
 
 //this is where we load the users.txt data into
 static list<login> myLogins;
@@ -46,13 +44,19 @@ static list<cookie> myCookies;
 void printDB(){
     int i = 0;
     for(login l : myLogins){
-        printUser(l, i);
-        //cout << "[" << i++ << "]: " << l.user << "\t\t" << l.email << "\t\t" << l.passHash << "\t\t" << l.salt << endl;
+        printUser_i(l, i++);
     }
 }
 
-void printUser(login l, int i){
-    cout << "[" << i++ << "]: " << l.user << "\t" << l.email << "\t" << l.passHash << "\t" << l.salt << endl;
+// wrapper for printUser, except that it prints a given index number, useful for outputting a database.
+void printUser_i(login l, int i){
+    cout << "[" << i++ << "]: ";
+    printUser(l);
+}
+
+//prints the username, email, password hash, and salt. All entries tab spaced, and ended with a newline.
+void printUser(login l){
+    cout << l.user << "\t" << l.email << "\t" << l.passHash << "\t" << l.salt << endl;
 }
 
 //returns a list of logins corresponding to valid cookies in our cookie DB
