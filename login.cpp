@@ -160,6 +160,11 @@ void initCookieDB(){
         //now break up the line into valid pieces to save as each part of the cookie
         ifs >> c.userID >> c.user >> c.token >> c.expiry;
 
+        //if it's not a valid user for whatever reason, don't add them to the cookie DB
+        //if(!findUserByName(c.user, (login*)nullptr) < 0){
+        if(ifs.eof()){
+            continue;
+        }
         //append cookie to myLogins
         myCookies.push_back(c);
     }
@@ -183,15 +188,23 @@ void saveDB(){
 void saveCookieDB(){
     //written VERY similiar to saveDB() function
     ofstream ofs("data/cookies.txt");
+
+    //if the DB is empty, create an empty file
+    if(myCookies.size() == 0){
+        ofs << "";
+        ofs.close();
+        return;
+    }
+
     for(cookie c : myCookies){
         //write the data from the list of structs into the text file
         ofs << c.userID << "\t" << c.user << "\t" << c.token << "\t" << c.expiry;
-        
+        ofs << endl;
         //only print a newline if we're NOT on the last entry
         //NOTE: if a user can smuggle two cookies into our db, he can mess up our db formatting
-        if(myCookies.back().userID != c.userID){   //compare the userID
-            ofs << endl;
-        }
+        //if(myCookies.back().userID != c.userID){   //compare the userID
+        //    ofs << endl;
+        //}
     }
     ofs.close();
 }
