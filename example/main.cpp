@@ -149,6 +149,7 @@ int createUsersInteractive(){
         if (loginAsUser(user, password, &c) == 0){
             cout << "Successfully logged in as " << user << ". Token = " << c.token << endl;
             pass = 1;
+            saveCookieDB();
         }
         else{
             cout << "Username or password does not match. Try again." << endl;
