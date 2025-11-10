@@ -64,7 +64,7 @@ void printUser_i(login l, int i){
 
 //prints the username, email, password hash, and salt. All entries tab spaced, and ended with a newline.
 void printUser(login l){
-    cout << l.user << "\t" << l.email << "\t" << l.passHash << "\t" << l.salt << endl;
+    cout << l.user << "\t" << l.passHash << "\t" << l.salt << endl;
 }
 
 //wrapper for printCookie() that prints given index as well
@@ -135,7 +135,7 @@ void initDB(){
     for(int i = 0; ifs.good(); ++i){
         login l;
         //now break up the line into valid pieces to save as each part of the login
-        ifs >> l.userID >> l.user >> l.email >> l.passHash >> l.salt;
+        ifs >> l.userID >> l.user >> l.passHash >> l.salt;
 
         //append l to myLogins
         myLogins.push_back(l);
@@ -175,7 +175,7 @@ void saveDB(){
     ofstream ofs("data/users.txt");
     for(login l : myLogins){
         //write the data from the list of structs into the text file
-        ofs << l.userID << "\t" << l.user << "\t" << l.email << "\t" << l.passHash << "\t" << l.salt;
+        ofs << l.userID << "\t" << l.user << "\t" << l.passHash << "\t" << l.salt;
         
         //only print a newline if we're NOT on the last entry
         if(myLogins.back().userID != l.userID){   //compare the usernames
@@ -209,7 +209,7 @@ void saveCookieDB(){
     ofs.close();
 }
 
-int addUser(string user, string email, string passwd){
+int addUser(string user, string passwd){
     //first check that this user does not already exist in the system
     //NOTE: we do this because the username still must be unique to each user. No duplicates allowed.
     if(findUserByName(user, nullptr) >= 0){
@@ -219,7 +219,6 @@ int addUser(string user, string email, string passwd){
     login l;
     //add basic values
     l.user = user;
-    l.email = email;
 
     //generate a random userID
     int id;
@@ -453,21 +452,6 @@ int editUsername(int userID, string newUsername){
     return 0;
 
 }
-
-//changes the email for the user with the given userID.
-// NOTE: the server should verify the user before running this function
-int editEmail(int userID, string newEmail){
-    //find user
-    login l;
-    if(findUserByID(userID, &l) < 0){
-        return -1;
-    }
-
-    //change email
-    l.email = newEmail;
-    return 0;
-}
-
 
 //TODO: rename this function or it's previous accidental override. Although they both have a decent
 //overlap in functionality, they're intended for different ends of the application (i think). Make a good fix.
