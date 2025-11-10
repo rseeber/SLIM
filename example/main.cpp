@@ -107,20 +107,17 @@ int createUsersInteractive(){
     //create some number of users iteratively
     for(int i = 0; i < cnt; ++i){
         string user;
-        string email;
         string password;
         //grab user input for current user
         cout << "===========" << endl << " USER #" << i+1 << endl << "===========" << endl;
         cout << "Input username\n> ";
         cin >> user;
-        cout << "Input email\n> ";
-        cin >> email;
         cout << "Input password\n> ";
         cin >> password;
 
         //save current user
         //error checking
-        if (addUser(user, email, password) < 0){
+        if (addUser(user, password) < 0){
             cout << "Error: couldn't add user, username already taken!\nTry again.\n";
             --i;    //don't increase the count of users if the user wasn't actually added
             continue;
@@ -160,10 +157,9 @@ int createUsersInteractive(){
 
 int createSingleUser(){
     string user = "River";
-    string email = "river@email.com";
     string password = "badPassword1";
 
-    if(addUser(user, email, password) < 0){
+    if(addUser(user, password) < 0){
         cout << "(Did you forget to delete 'users.txt'?)" << endl;
         return -1;
     }
