@@ -17,7 +17,8 @@ Listed below are some of the major functions of the SLIM library, and which demo
 - `initDB()`: loads the database of passwords into memory. All future read and write operations on the database will be done to the version in memory. Changes will only be synced back to the disk when calling `saveDB()`.
 - `addUser()`: creates a new user in the database. This function will automatically handle salting and hashing of the password by using the SHA256 hash function, and the output will be stored in the database along with its salt. The plaintext password will of course not be saved to the database.
 - `loginAsUser()`: will check if the provided username and password are correct. If the password matches the provided user, it will return a 1, otherwise it returns 0. Furthermore, when it returns a 1, the provided pointer `*cook` will be assigned with a cookie associated with that user, which can later be used for performing actions as the user without providing the password again.
-- `editPasswd()` allows you to edit the password stored on the database for the user. Simply enter the new password as a parameter, and it will do all the hashing and salting for you.
+- `validateToken()`: takes in a user provided token. Returns either a userID for the account corresponding to that token, or otherwise -1 if the token doesn't exist or is expired.
+- `editPasswd()`: allows you to edit the password stored on the database for the user. Simply enter the new password as a parameter, and it will do all the hashing and salting for you.
 - `saveDB()`: saves the database of passwords back down to the disk, overwriting any previous versions. This function should be called at program termination, as well as intermitently during extended runtime in order to prevent data loss if the program terminates abruptly.
 
 ## Internal Functions
