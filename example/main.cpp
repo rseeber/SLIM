@@ -19,6 +19,7 @@ int createSingleUser();
 int createUsersInteractive();
 int userLogin();
 void handleLogin();
+void cookieTest();
 
 
 int main(int argc, char** argv){
@@ -33,6 +34,11 @@ int main(int argc, char** argv){
         //login as user
         if(strcmp(argv[1], "-l") == 0){
             return userLogin();
+        }
+        //use cookie/session token
+        if(strcmp(argv[1], "-c") == 0){
+            cookieTest();
+            return 0;
         }
     }
     //just make a single default value user
@@ -176,4 +182,16 @@ int createSingleUser(){
     saveDB();
 
     return 0;
+}
+
+void cookieTest(){
+    initCookieDB();
+    cout << "Enter token value\n> ";
+    unsigned int token;
+    cin >> token;
+
+    login l;
+    findUserByID(validateToken(token), &l);
+
+    cout << "This token belongs to " << l.user << ".\n";
 }
