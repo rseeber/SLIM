@@ -17,23 +17,12 @@
  *  You should have received a copy of the GNU Lesser General Public License along with SLIM. If not, see <https://www.gnu.org/licenses/>. 
  */
 
-#include "login.hpp"
 
-// === internal functions ===
+// How many bytes of salt to append to the password plaintext before hashing
+#define SALT_LEN 16
 
-//generates a unique cookie, saving it to the database, or overwriting any old cookie for that user.
-int generateCookie(int userID, cookie* cook);
+// How many bytes of hashtext to generate for each password
+#define HASH_LEN 32
 
-//DEPRICATED/EMPTY FUNCTION
-//write the requested data to the buffer pointed to by buf
-int getUserData(string user, string cookie, int dataID, string* buf);
-
-//converts binary data into the cleaner hexidecimal format
-void toHex(unsigned char* hashData, __ssize_t dataLen, char* hashString);
-
-
-//hashes the passwd with the provided salt, storing it at the buffer pointed to by buf
-int hashPasswd(string passwd, string salt, string* buf);
-
-//hashes passwd, generating a NEW salt stored at *salt. Hash is stored at *buf.
-int hashPasswd_generateSalt(string passwd, string* salt, string* buf);
+// How many seconds should a login token (cookie) be valid for before expiring?
+#define COOKIE_EXPIRY_LEN_SECONDS 600   //10 minutes = 60 seconds * 10 = 600 seconds

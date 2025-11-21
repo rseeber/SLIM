@@ -19,6 +19,7 @@ int createSingleUser();
 int createUsersInteractive();
 int userLogin();
 void handleLogin();
+void cookieTest();
 
 
 int main(int argc, char** argv){
@@ -34,6 +35,11 @@ int main(int argc, char** argv){
         if(strcmp(argv[1], "-l") == 0){
             return userLogin();
         }
+        //use cookie/session token
+        if(strcmp(argv[1], "-c") == 0){
+            cookieTest();
+            return 0;
+        }
     }
     //just make a single default value user
     return createSingleUser();
@@ -45,7 +51,7 @@ int userLogin(){
     //print logged in users
     cout << 
         "===================\n" << 
-        " Logged in users \n" << 
+        "  Logged in users \n" << 
         "===================\n";
     cout << getLoggedInUsers_string() << "\n\n";
 
@@ -107,20 +113,17 @@ int createUsersInteractive(){
     //create some number of users iteratively
     for(int i = 0; i < cnt; ++i){
         string user;
-        string email;
         string password;
         //grab user input for current user
         cout << "===========" << endl << " USER #" << i+1 << endl << "===========" << endl;
         cout << "Input username\n> ";
         cin >> user;
-        cout << "Input email\n> ";
-        cin >> email;
         cout << "Input password\n> ";
         cin >> password;
 
         //save current user
         //error checking
-        if (addUser(user, email, password) < 0){
+        if (addUser(user, password) < 0){
             cout << "Error: couldn't add user, username already taken!\nTry again.\n";
             --i;    //don't increase the count of users if the user wasn't actually added
             continue;
@@ -149,6 +152,7 @@ int createUsersInteractive(){
         if (loginAsUser(user, password, &c) == 0){
             cout << "Successfully logged in as " << user << ". Token = " << c.token << endl;
             pass = 1;
+            saveCookieDB();
         }
         else{
             cout << "Username or password does not match. Try again." << endl;
@@ -159,10 +163,9 @@ int createUsersInteractive(){
 
 int createSingleUser(){
     string user = "River";
-    string email = "river@email.com";
     string password = "badPassword1";
 
-    if(addUser(user, email, password) < 0){
+    if(addUser(user, password) < 0){
         cout << "(Did you forget to delete 'users.txt'?)" << endl;
         return -1;
     }
@@ -179,4 +182,16 @@ int createSingleUser(){
     saveDB();
 
     return 0;
+}
+
+void cookieTest(){
+    initCookieDB();
+    cout << "Enter token value\n> ";
+    unsigned int token;
+    cin >> token;
+
+    login l;
+    findUserByID(validateToken(token), &l);
+
+    cout << "This token belongs to " << l.user << ".\n";
 }

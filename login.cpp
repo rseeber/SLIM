@@ -1,8 +1,8 @@
 /*
  * Project: Simple LogIn Manager (SLIM) Library
  * Author: River Seeber
- * Date: April 2025
- * Version: 1.0.0
+ * Date: May 2025
+ * Version: 1.1.0 development
  */
 
 /*
@@ -32,32 +32,50 @@
 #include <string.h>
 using namespace std;
 
-#define SALT_LEN 16
-#define HASH_LEN 32
-#define API_MAX_LEN 100
-#define COOKIE_EXPIRY_LEN_SECONDS 600   //10 minutes = 60 seconds * 10 = 600 seconds
-
+// A user accessible header file that they compile with the library.
+// It allows them to change default values like hash output length, and cookie expiry time
+#include "config.hpp"
 
 //this is where we load the users.txt data into
 static list<login> myLogins;
-//list of all cookies, which are removed when they get accessed after expiration. These do not get saved to the harddrive on exit().
+//list of all cookies, which are removed when they get accessed after expiration.
 static list<cookie> myCookies;
-
-//TODO: investigate
-void exit(){
-    saveDB();
-}
 
 void printDB(){
     int i = 0;
     for(login l : myLogins){
-        printUser(l, i);
-        //cout << "[" << i++ << "]: " << l.user << "\t\t" << l.email << "\t\t" << l.passHash << "\t\t" << l.salt << endl;
+        printUser_i(l, i++);
     }
 }
 
-void printUser(login l, int i){
-    cout << "[" << i++ << "]: " << l.user << "\t" << l.email << "\t" << l.passHash << "\t" << l.salt << endl;
+void printCookieDB(){
+    int i = 0;
+    for(cookie c : myCookies){
+        printCookie_i(c, i++);
+    }
+}
+
+// wrapper for printUser, except that it prints a given index number, useful for outputting a database.
+void printUser_i(login l, int i){
+    cout << "[" << i << "]: ";
+    printUser(l);
+}
+
+
+//prints the username, email, password hash, and salt. All entries tab spaced, and ended with a newline.
+void printUser(login l){
+    cout << l.user << "\t" << l.passHash << "\t" << l.salt << endl;
+}
+
+//wrapper for printCookie() that prints given index as well
+void printCookie_i(cookie c, int i){
+    cout << "[" << i << "]: ";
+    printCookie(c);
+}
+
+//prints info for a cookie: userID, username, token, and expiry timestamp
+void printCookie(cookie c){
+    cout << c.userID << "\t" << c.user << "\t" << c.token << "\t" << c.expiry << endl;
 }
 
 //returns a list of logins corresponding to valid cookies in our cookie DB
@@ -69,16 +87,19 @@ list<login> getLoggedInUsers(){
         //get the userID by validating it (to prove it's not expired!!)
         int userID;
         if((userID = validateToken(c.token)) < 0){
-            cout << "Skipping expired token!\n";
+            //cout << "Skipping expired token!\n";
             //cookie is expired, skip it!
             continue;
         }
-        //get an iterator for logins
-        list<login>::iterator it;
-        //point the iterator to the user who owns the cookie, in our login DB
-        findUserByID(userID, &it);
+        //the current login we're dealing with
+        login l;
+        //find the user and store them on l.
+        if(findUserByID(userID, &l) < 0){
+            printf("Warning: user '%s' exists in the cookieDB, but not in the userDB!\n", c.user);
+            continue;   //if the user doesn't exist in the database, skip them.
+        }
         //append that login VALUE to our list of logged in users
-        users.push_back(*it);
+        users.push_back(l);
     }
     //return our list of logged in users
     return users;
@@ -114,7 +135,7 @@ void initDB(){
     for(int i = 0; ifs.good(); ++i){
         login l;
         //now break up the line into valid pieces to save as each part of the login
-        ifs >> l.userID >> l.user >> l.email >> l.passHash >> l.salt;
+        ifs >> l.userID >> l.user >> l.passHash >> l.salt;
 
         //append l to myLogins
         myLogins.push_back(l);
@@ -139,6 +160,11 @@ void initCookieDB(){
         //now break up the line into valid pieces to save as each part of the cookie
         ifs >> c.userID >> c.user >> c.token >> c.expiry;
 
+        //if it's not a valid user for whatever reason, don't add them to the cookie DB
+        //if(!findUserByName(c.user, (login*)nullptr) < 0){
+        if(ifs.eof()){
+            continue;
+        }
         //append cookie to myLogins
         myCookies.push_back(c);
     }
@@ -149,7 +175,7 @@ void saveDB(){
     ofstream ofs("data/users.txt");
     for(login l : myLogins){
         //write the data from the list of structs into the text file
-        ofs << l.userID << "\t" << l.user << "\t" << l.email << "\t" << l.passHash << "\t" << l.salt;
+        ofs << l.userID << "\t" << l.user << "\t" << l.passHash << "\t" << l.salt;
         
         //only print a newline if we're NOT on the last entry
         if(myLogins.back().userID != l.userID){   //compare the usernames
@@ -162,20 +188,28 @@ void saveDB(){
 void saveCookieDB(){
     //written VERY similiar to saveDB() function
     ofstream ofs("data/cookies.txt");
+
+    //if the DB is empty, create an empty file
+    if(myCookies.size() == 0){
+        ofs << "";
+        ofs.close();
+        return;
+    }
+
     for(cookie c : myCookies){
         //write the data from the list of structs into the text file
         ofs << c.userID << "\t" << c.user << "\t" << c.token << "\t" << c.expiry;
-        
+        ofs << endl;
         //only print a newline if we're NOT on the last entry
         //NOTE: if a user can smuggle two cookies into our db, he can mess up our db formatting
-        if(myCookies.back().userID != c.userID){   //compare the userID
-            ofs << endl;
-        }
+        //if(myCookies.back().userID != c.userID){   //compare the userID
+        //    ofs << endl;
+        //}
     }
     ofs.close();
 }
 
-int addUser(string user, string email, string passwd){
+int addUser(string user, string passwd){
     //first check that this user does not already exist in the system
     //NOTE: we do this because the username still must be unique to each user. No duplicates allowed.
     if(findUserByName(user, nullptr) >= 0){
@@ -185,7 +219,6 @@ int addUser(string user, string email, string passwd){
     login l;
     //add basic values
     l.user = user;
-    l.email = email;
 
     //generate a random userID
     int id;
@@ -195,7 +228,7 @@ int addUser(string user, string email, string passwd){
     l.userID = abs(id);
 
     //password hashing
-    hashPasswd(passwd, &l.salt, &l.passHash);
+    hashPasswd_generateSalt(passwd, &l.salt, &l.passHash);
 
     //append l to myLogins
     myLogins.push_back(l);
@@ -252,7 +285,8 @@ int logout(string username){
 
     //find the cookie struct, so we can extract the token from it
     list<cookie>::iterator it;
-    if(findCookieByUserID(userID, &it) < 0){
+    cookie c;
+    if(findCookieByUserID(userID, &c) < 0){
         cout << "Error: couldn't find user with userID " << userID << ", and username " << username <<".\n";
         return -1;
     }
@@ -283,13 +317,13 @@ int validateToken(unsigned int token){
 
 //removes a user associated with a given userID from the login database. returns 0 on success, or -1 if no such user exists.
 int deleteUser(int userID){
-    list<login>::iterator it;
-    if(findUserByID(userID, &it) < 0){
+    login l;
+    if(findUserByID(userID, &l) < 0){
         //error, can't find user
         return -1;
     }
     //remove the user
-    myLogins.remove(*it);
+    myLogins.remove(l);
     return 0;
 }
 
@@ -307,12 +341,12 @@ int generateCookie(int userID, cookie* cook){
     time_t expiry = time(nullptr) + COOKIE_EXPIRY_LEN_SECONDS;
     
     //determine username
-    list<login>::iterator l_it; //login iterator
-    if(findUserByID(userID, &l_it) < 0){
+    login l;
+    if(findUserByID(userID, &l) < 0){
         cout << "Error: couldn't find user with id = " << userID << endl;
         return -1;
     }
-    string username = l_it->user;
+    string username = l.user;
 
     //create the cookie struct
     cookie c;
@@ -321,74 +355,86 @@ int generateCookie(int userID, cookie* cook){
     c.user = username;
     c.token = token;
     c.expiry = expiry;
+
     //check to see if we already have this user in our cookie database
-    list<cookie>::iterator it = find(myCookies.begin(), myCookies.end(), c);    //find(cookie) uses cookie.userID to compare
+    cookie tmpC;
     //if the user already has a registered cookie, delete the old one, and use the new one
-    if(it != myCookies.end()){
-        *it = c;
+    if(findCookieByUserID(userID, &tmpC) == 0){
+        //remove the cookie from our DB
+        myCookies.remove(tmpC);
     }
-    //otherwise, add a new cookie entry to the cookie database
+    // add a new cookie entry to the cookie database
     myCookies.push_back(c);
-    myCookies.sort();   //unnecessary, since we're using a linear search algorithm. Remove?
 
     //assign the value of cook to be our newly generated cookie entry
     *cook = c;
     return 0;
 }
 
-//finds a user from the users database, and puts the iterator at the location pointed to by *it. 
-// Returns 0 on success or -1 on error.
-int findUserByID(int userID, list<login>::iterator *it){
-    *it = find(myLogins.begin(), myLogins.end(), userID);
+//finds a user from the users database, and stores the login at the location pointed to by *l. 
+// Returns 0 on success or -1 if the user was not found.
+int findUserByID(int userID, login *l){
+    list<login>::iterator it = find(myLogins.begin(), myLogins.end(), userID);
     //if not found
-    if(*it == myLogins.end()){
+    if(it == myLogins.end()){
         return -1;
     }
+
+    //convert iterator to login pointer
+    *l = *it;
     return 0;
 }
 
 //finds a cookie from the cookie database, and puts the iterator at the location pointed to by *it. 
 // Returns 0 on success or -1 on error.
-int findCookieByUserID(int userID, list<cookie>::iterator *it){
-    cookie c;
-    c.userID = userID;
-    *it = find(myCookies.begin(), myCookies.end(), c);
-    if(*it == myCookies.end()){
+int findCookieByUserID(int userID, cookie *c){
+    list<cookie>::iterator it;  //the iterator that will point to our found cookie
+
+    //this allows us to use find(), as it will compare the userID's of the two cookies
+    cookie tempCook;
+    tempCook.userID = userID;
+
+    //note: we cannot use function overloads, since
+    // operator<(int, cookie) is already defined to work in terms
+    // of token -- not userID.
+    it = find(myCookies.begin(), myCookies.end(), tempCook);
+    if(it == myCookies.end()){
         return -1;
     }
+    *c = *it;
     return 0;
 }
 
 //returns the current username for a given userID
 string getUsername(int userID){
-    list<login>::iterator it;
+    login l;
     //find the login object
-    if(findUserByID(userID, &it) < 0){
+    if(findUserByID(userID, &l) < 0){
         //error
         return "";
     }
     // pull out the username
-    return it->user;
+    return l.user;
 }
 
 //changes the password for the user with the given userID. Generates new salt as well.
 // NOTE: the server should verify the user before running this function
 int editPasswd(int userID, string newPass){
     //find user
-    list<login>::iterator it;
-    if (findUserByID(userID, &it) < 0){
+    login l;
+    if (findUserByID(userID, &l) < 0){
         //not found
         return -1;
     }
     //generate a new password
     string passHash, salt;
-    if(hashPasswd(newPass, &salt, &passHash) < 0){
+    if(hashPasswd_generateSalt(newPass, &salt, &passHash) < 0){
         //couldn't hash password. Try again.
         return -1;
     }
     //save the passHash and salt to our user.
-    it->passHash = passHash;
-    it->salt = salt;
+    l.passHash = passHash;
+    l.salt = salt;
     return 0;
 }
 
@@ -396,31 +442,16 @@ int editPasswd(int userID, string newPass){
 // NOTE: the server should verify the user before running this function
 int editUsername(int userID, string newUsername){
     //find user
-    list<login>::iterator it;
-    if(findUserByID(userID, &it) < 0){
+    login l;
+    if(findUserByID(userID, &l) < 0){
         return -1;
     }
 
     //set the username
-    it->user = newUsername;
+    l.user = newUsername;
     return 0;
 
 }
-
-//changes the email for the user with the given userID.
-// NOTE: the server should verify the user before running this function
-int editEmail(int userID, string newEmail){
-    //find user
-    list<login>::iterator it;
-    if(findUserByID(userID, &it) < 0){
-        return -1;
-    }
-
-    //change email
-    it->email = newEmail;
-    return 0;
-}
-
 
 //TODO: rename this function or it's previous accidental override. Although they both have a decent
 //overlap in functionality, they're intended for different ends of the application (i think). Make a good fix.
@@ -459,7 +490,7 @@ int hashPasswd(string passwd, string salt, string* buf){
 }
 
 //Hashes a password that you do not have the salt for, and assignes the salt to the pointer you pass in
-int hashPasswd(string passwd, string* salt, string* buf){
+int hashPasswd_generateSalt(string passwd, string* salt, string* buf){
     char* saltData = (char*)malloc(SALT_LEN + 1);   //binary data
     //get random bytes for salt
     if(RAND_bytes((unsigned char*)saltData, SALT_LEN) < 0){
@@ -483,11 +514,6 @@ void toHex(unsigned char* hashData, __ssize_t dataLen, char* hashString){
         //write the hex into hashString, one byte at a time (2 hex digits)
         snprintf(hashString+(2*i), 3, "%02X", hashData[i]);
     }
-}
-
-//converts Hexidecimal text back into binary data
-void toBinary(const char* hex, size_t N, unsigned char* data){
-
 }
 
 //operator overloads used for sorting entries in order to make searching the db efficient
@@ -528,24 +554,4 @@ bool operator==(const cookie& a, const unsigned int b){
 }
 bool operator<(const cookie& a, const unsigned int b){
     return a.token < b;
-}
-
-//cookie struct funcs
-
-//checks if both cookies have identical values in all fields
-bool cookiesEqual(cookie c1, cookie c2){
-    //check userID
-    if(c1.userID != c2.userID)
-        return false;
-
-    //check token value
-    if(c1.token != c2.token)
-        return false;
-
-    //check expiry
-    if(c1.expiry == c2.expiry)
-        return false;
-    
-    //if there's no differences, return true
-    return true;
 }

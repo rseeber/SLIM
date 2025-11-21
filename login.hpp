@@ -1,8 +1,8 @@
 /*
  * Project: Simple LogIn Manager (SLIM) Library
  * Author: River Seeber
- * Date: April 2025
- * Version: 1.0.0
+ * Date: May 2025
+ * Version: 1.1.0 development
  */
 
 /*
@@ -27,7 +27,6 @@ using namespace std;
 struct login {
     int userID; //new
     string user;
-    string email;
     string passHash;
     string salt;
 };
@@ -47,7 +46,7 @@ list<login> getLoggedInUsers();
 string getLoggedInUsers_string();
 
 //creates a new user in the database with the given info, unless that username is already taken. Returns 0 on sucess, or -1 on error.
-int addUser(string user, string email, string passwd);
+int addUser(string user, string passwd);
 
 //changes the password for the user with the given userID. Generates new salt as well.
 // NOTE: the server should verify the user before running this function
@@ -56,10 +55,6 @@ int editPasswd(int userID, string newPass);
 //changes the username of the user with the given userID.
 // NOTE: the server should verify the user before running this function
 int editUsername(int userID, string newUsername);
-
-//changes the email for the user with the given userID.
-// NOTE: the server should verify the user before running this function
-int editEmail(int userID, string newEmail);
 
 //login, setting 'cook' as a temporary login cookie for the user, returning 0 on success, or -1 on error.
 int loginAsUser(string user, string passwd, cookie* cook);
@@ -92,16 +87,31 @@ void saveCookieDB();
 //literally just print the whole database
 void printDB();
 
+// same as printDB(), but it prints cookies, not users
+void printCookieDB();
 
+// wrapper for printUser, except that it prints a given index number, useful for outputting a database.
+void printUser_i(login l, int i);
 
+//prints the username, email, password hash, and salt. All entries tab spaced, and ended with a newline.
+void printUser(login l);
+
+//wrapper for printCookie() that prints given index as well
+void printCookie_i(cookie c, int i);
+
+//prints info for a cookie: userID, username, token, and expiry timestamp
+void printCookie(cookie c);
+
+//returns the current username for a given userID
+string getUsername(int userID);
 
 //returns the login for user on the login pointed to by log
 int findUserByName(string user, login* log);
 
 //finds a user from the users database, and puts the iterator at the location pointed to by *it. 
 // Returns 0 on success or -1 on error.
-int findUserByID(int userID, list<login>::iterator *it);
+int findUserByID(int userID, login *l);
 
 //finds a cookie from the cookie database, and puts the iterator at the location pointed to by *it. 
 // Returns 0 on success or -1 on error.
-int findCookieByUserID(int userID, list<cookie>::iterator *it);
+int findCookieByUserID(int userID, cookie *c);
