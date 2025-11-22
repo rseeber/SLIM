@@ -187,7 +187,7 @@ int createSingleUser(){
 void cookieTest(){
     initCookieDB();
     cout << "Enter token value\n> ";
-    unsigned int token;
+    uint64_t token;
     cin >> token;
 
     login l;
