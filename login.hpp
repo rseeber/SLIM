@@ -21,6 +21,7 @@
 
 #include <string>
 #include <list>
+#include <cstdint>
 
 using namespace std;
 
@@ -34,7 +35,7 @@ struct login {
 struct cookie {
     int userID;
     string user;    //Do not use username for verification. userID's are the only unique ID.
-    unsigned int token;
+    uint64_t token;
     time_t expiry;
 };
 
@@ -60,14 +61,14 @@ int editUsername(int userID, string newUsername);
 int loginAsUser(string user, string passwd, cookie* cook);
 
 //revokes a cookie token early. Returns the userID of the logged out user on success, or -1 on error.
-int logout(unsigned int token);
+int logout(uint64_t token);
 
 //wrapper for logout, which find the token by getting the userID from 
 //the login db, then getting the token from the cookei db.
 int logout(string username);
 
 //searches database for an unexpired cookie with the given token value. Returns the associated userID, or -1 on failure.
-int validateToken(unsigned int token);
+int validateToken(uint64_t token);
 
 //removes a user associated with a given userID from the login database. returns 0 on success, or -1 if no such user exists.
 int deleteUser(int userID);

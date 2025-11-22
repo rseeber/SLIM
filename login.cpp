@@ -259,7 +259,7 @@ int loginAsUser(string user, string passwd, cookie* cook){
 }
 
 //revokes a cookie token early. 
-int logout(unsigned int token){
+int logout(uint64_t token){
     //find the cookie by username
     list<cookie>::iterator it = find(myCookies.begin(), myCookies.end(), token);
     //if found
@@ -296,7 +296,7 @@ int logout(string username){
 }
 
 //searches database for an unexpired cookie with the given token value. Returns the associated userID, or -1 on failure.
-int validateToken(unsigned int token){
+int validateToken(uint64_t token){
     //check if the given token exists in the cookie database
     list<cookie>::iterator it = find(myCookies.begin(), myCookies.end(), token);
 
@@ -331,8 +331,8 @@ int deleteUser(int userID){
 int generateCookie(int userID, cookie* cook){
     
     //generate random bytes for the token value, and assign them to `token`.
-    unsigned int token;
-    if(RAND_bytes((unsigned char*)(&token), sizeof(int)) < 0){
+    uint64_t token;
+    if(RAND_bytes((unsigned char*)(&token), sizeof(uint64_t)) < 0){
         cout << "error: couldn't generate random data\n";
         return -1;
     }
@@ -549,9 +549,9 @@ bool operator<(const cookie& a, const cookie& b){
 }
 
 //compare cookie with token
-bool operator==(const cookie& a, const unsigned int b){
+bool operator==(const cookie& a, uint64_t b){
     return a.token == b;
 }
-bool operator<(const cookie& a, const unsigned int b){
+bool operator<(const cookie& a, uint64_t b){
     return a.token < b;
 }
