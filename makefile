@@ -1,7 +1,4 @@
-pkg:build
-	# copy all necessary header files into the package output folder
-	cp login.hpp bin/login.hpp		# login.hpp for userspace function definitions
-	cp config.hpp bin/config.hpp	# config.hpp for userspace configurations
+pkg:build lib
 	@printf "\n\nRemember to 'gpg --output bin/login.o.sig --detach-sig bin/login.o' to sign the binary!\n"
 
 build:clean bin/login.o
@@ -14,3 +11,8 @@ bin/login.o:
 
 clean:
 	gio trash bin/ -f
+
+lib:bin/login.o
+	# copy all necessary header files into the package output folder
+	cp login.hpp bin/login.hpp		# login.hpp for userspace function definitions
+	cp config.hpp bin/config.hpp	# config.hpp for userspace configurations
