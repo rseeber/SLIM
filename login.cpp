@@ -384,6 +384,7 @@ int findUserByID(int userID, login *l){
     return 0;
 }
 
+// doesn't work yet
 int findUserByID_ptr(int userID, login *l){
     list<login>::iterator it = find(myLogins.begin(), myLogins.end(), userID);
     //if not found
@@ -431,6 +432,7 @@ string getUsername(int userID){
 
 //changes the password for the user with the given userID. Generates new salt as well.
 // NOTE: the server should verify the user before running this function
+// currently broken
 int editPasswd(int userID, string newPass){
     //find user
     login* l;
@@ -458,6 +460,7 @@ int editPasswd(int userID, string newPass){
 
 //changes the username of the user with the given userID.
 // NOTE: the server should verify the user before running this function
+// doesn't work yet
 int editUsername(int userID, string newUsername){
     //find user
     login l;
