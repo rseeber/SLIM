@@ -284,7 +284,6 @@ int logout(string username){
     userID = l.userID;
 
     //find the cookie struct, so we can extract the token from it
-    list<cookie>::iterator it;
     cookie c;
     if(findCookieByUserID(userID, &c) < 0){
         cout << "Error: couldn't find user with userID " << userID << ", and username " << username <<".\n";
@@ -292,7 +291,7 @@ int logout(string username){
     }
 
     //call inner function to logout with the token.
-    return logout(it->token);
+    return logout(c.token);
 }
 
 //searches database for an unexpired cookie with the given token value. Returns the associated userID, or -1 on failure.
