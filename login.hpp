@@ -113,6 +113,10 @@ int findUserByName(string user, login* log);
 // Returns 0 on success or -1 on error.
 int findUserByID(int userID, login *l);
 
+// same as findUserByID(), except that the value in l points to the login in the myLogins memory.
+// that is, you are able to edit the database by editing this l
+int findUserByID_ptr(int userID, login *l);
+
 //finds a cookie from the cookie database, and puts the iterator at the location pointed to by *it. 
 // Returns 0 on success or -1 on error.
 int findCookieByUserID(int userID, cookie *c);

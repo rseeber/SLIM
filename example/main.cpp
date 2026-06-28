@@ -20,6 +20,7 @@ int createUsersInteractive();
 int userLogin();
 void handleLogin();
 void cookieTest();
+int editUsers();
 
 
 int main(int argc, char** argv){
@@ -39,6 +40,9 @@ int main(int argc, char** argv){
         if(strcmp(argv[1], "-c") == 0){
             cookieTest();
             return 0;
+        }
+        if(strcmp(argv[1], "-e") == 0){
+            return editUsers();
         }
     }
     //just make a single default value user
@@ -194,4 +198,38 @@ void cookieTest(){
     findUserByID(validateToken(token), &l);
 
     cout << "This token belongs to " << l.user << ".\n";
+}
+
+int editUsers(){
+    cout << "What user will you edit?\n> ";
+    string user;
+    cin >> user;
+
+    cout << "What will you change?\n\t(a) Username\n\t(b) Password\n> ";
+    string opt;
+    cin >> opt;
+    int flag;
+
+    printDB();
+    if(opt.compare("a") == 0){
+        cout << "New username\n> ";
+        string newUser;
+        cin >> newUser;
+        login l;
+        findUserByName(user, &l);
+        flag = editUsername(l.userID, newUser);
+        cout << "flag: " << flag << endl;
+    }
+    else if(opt.compare("b") == 0){
+        cout << "New password\n> ";
+        string newPass;
+        cin >> newPass;
+        login l;
+        findUserByName(user, &l);
+        flag = editPasswd(l.userID, newPass);
+        cout << "flag: " << flag << endl;
+    }
+    printDB();
+    saveDB();
+    return flag;
 }

@@ -384,6 +384,19 @@ int findUserByID(int userID, login *l){
     return 0;
 }
 
+int findUserByID_ptr(int userID, login *l){
+    list<login>::iterator it = find(myLogins.begin(), myLogins.end(), userID);
+    //if not found
+    if(it == myLogins.end()){
+        return -1;
+    }
+
+    //convert iterator to login pointer
+    l = &(*it);
+    return 0;
+
+}
+
 //finds a cookie from the cookie database, and puts the iterator at the location pointed to by *it. 
 // Returns 0 on success or -1 on error.
 int findCookieByUserID(int userID, cookie *c){
@@ -420,11 +433,14 @@ string getUsername(int userID){
 // NOTE: the server should verify the user before running this function
 int editPasswd(int userID, string newPass){
     //find user
-    login l;
-    if (findUserByID(userID, &l) < 0){
+    login* l;
+    if (findUserByID_ptr(userID, l) < 0){
         //not found
         return -1;
     }
+    cout << "old hash: " << l->passHash << endl;
+    cout << "old salt: " << l->salt << endl;
+    cout << "pointer: " << l << endl;
     //generate a new password
     string passHash, salt;
     if(hashPasswd_generateSalt(newPass, &salt, &passHash) < 0){
@@ -432,8 +448,11 @@ int editPasswd(int userID, string newPass){
         return -1;
     }
     //save the passHash and salt to our user.
-    l.passHash = passHash;
-    l.salt = salt;
+    l->passHash = passHash;
+    l->salt = salt;
+    cout << "new hash: " << l->passHash << endl;
+    cout << "new salt: " << l->salt << endl;
+
     return 0;
 }
 
