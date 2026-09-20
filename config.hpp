@@ -25,4 +25,4 @@
 #define HASH_LEN 32
 
 // How many seconds should a login token (cookie) be valid for before expiring?
-#define COOKIE_EXPIRY_LEN_SECONDS 600   //10 minutes = 60 seconds * 10 = 600 seconds
+#define COOKIE_EXPIRY_LEN_SECONDS 10800   //3hrs = 60secs/min * 60mins/hr * 3hrs = 10800 seconds
