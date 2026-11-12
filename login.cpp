@@ -134,8 +134,17 @@ void initDB(){
     //save the current line of the document to `line`
     for(int i = 0; ifs.good(); ++i){
         login l;
+        l.userID = -1;
         //now break up the line into valid pieces to save as each part of the login
         ifs >> l.userID >> l.user >> l.passHash >> l.salt;
+
+        // make sure we filled all of our values up from the file read
+        // (this fixes a bug when it tries to read an empty file, for instance)
+        if(l.userID == -1 || l.user.empty() || l.passHash.empty() || l.salt.empty()){
+            printf("initDB(): reading from file couldn't fill a login\n");
+            printf("Continuing...\n");
+            continue;
+        }
 
         //append l to myLogins
         myLogins.push_back(l);

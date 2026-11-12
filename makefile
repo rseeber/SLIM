@@ -1,8 +1,11 @@
-pkg:build lib
+pkg:build lib tests
 	@printf "\n\nRemember to 'gpg --output bin/login.o.sig --detach-sig bin/login.o' to sign the binary!\n"
 
 build:clean bin/login.o
 	g++ example/main.cpp bin/login.o -lcrypto -o bin/main
+
+tests:build
+	g++ example/tests.cpp bin/login.o -lcrypto -o bin/tests
 
 bin/login.o:
 	# Create the bin/ folder, since 'make clean' deletes it
